@@ -1,0 +1,32 @@
+/* 主要形状样式 */
+.width-300 {
+  width: 300px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+
+/* input输入框的样式 */
+.small-input {
+  width: 10%;
+}
+
+.large-input {
+  width: 70%;
+}
+
+.medium-input {
+  width: 60%;
+}
+
+/* 功能性的样式 */
+.label-text {
+  font-weight: bold;
+  display: inline-block;
+}
+
+.ivu-tooltip-inner {
+  max-width: unset;
+}

@@ -1,0 +1,223 @@
+
+/*margin*/
+.margin-top-10 {
+  margin-top: 10px;
+}
+
+.margin-top-20 {
+  margin-top: 20px;
+}
+
+.margin-bottom-10 {
+    margin-bottom: 10px !important;
+}
+
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+
+.margin-left-10 {
+    margin-left: 10px;
+}
+
+.margin-right-10 {
+  margin-right: 10px !important;
+}
+
+.margin-right-5 {
+  margin-right: 5px;
+}
+
+.margin-20 {
+  margin: 20px;
+}
+
+.margin-10 {
+  margin: 20px;
+}
+
+.margin-5 {
+  margin: 5px;
+}
+
+/*padding*/
+.padding-5 {
+  padding: 5px;
+}
+
+.padding-10 {
+  padding: 10px;
+}
+
+.padding-right-30 {
+  padding-right: 30px;
+}
+
+.padding-right-20 {
+  padding-right: 20px;
+}
+
+.padding-left-20 {
+  padding-left: 20px;
+}
+
+/*text-align*/
+
+.text-align-right {
+    text-align: right;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.center {
+  margin: 0 auto;
+}
+
+/*字体大小*/
+.font-14 {
+  font-size: 14px;
+}
+
+/*宽度*/
+.width-50 {
+  width: 50px !important;
+}
+
+.width-80 {
+  width: 80px !important;
+}
+
+.width-150 {
+  width: 150px !important;
+}
+
+.width-200 {
+  width: 200px !important;
+}
+
+.width-300 {
+  width: 300px !important;
+}
+
+.width-400 {
+  width: 400px !important;
+}
+
+.width-500 {
+  width: 500px !important;
+}
+
+.width-800 {
+  width: 800px !important;
+}
+
+.height-500 {
+  height: 500px !important;
+}
+/*标签样式*/
+.label-text {
+  font-weight: bold;
+}
+
+/*display*/
+.display-block {
+  display: block !important;
+}
+
+.display-inline-block {
+  display: inline-block;
+}
+
+.float-right {
+  float: right;
+}
+
+/*position 相关*/
+.position-relative {
+  position: relative;
+}
+
+/*翻页组件*/
+.page {
+  text-align: right;
+  margin: 10px 0;
+}
+
+/* 固定到导航栏下方的保存按钮样式 */
+.operation-btn {
+  position: fixed;
+  top: 60px;
+  right: 15%;
+  z-index: 2;
+}
+
+/* 固定到侧边的按钮 */
+.side-operation-btn {
+  position: fixed;
+  top: 100px;
+  right: 0;
+}
+
+.menu {
+  position: fixed !important;
+  width:100%;
+  top:0;
+  left:0
+}
+
+.footer {
+  height: 50px;
+}
+
+.is-hidden {
+  visibility: hidden;
+}
+
+.hand-pointer {
+  cursor: pointer;
+}
+
+.modal-title {
+  color:#f60 !important;
+  text-align:center;
+}
+
+.modal-header {
+}
+
+.required {
+    color: red;
+    margin: 0 2px;
+}
+
+/* 颜色 */
+.blue {
+   color: blue;
+}
+
+.white {
+   color: white;
+}
+
+.red {
+   color: red;
+}
+
+/* float */
+.clear-right {
+  clear: right;
+}
+.float-left {
+  float: left;
+}
+.float-right {
+  float: right;
+}
+
+/* flext */
+.flex-row {
+  display: flex;
+  justify-content: space-between;
+}

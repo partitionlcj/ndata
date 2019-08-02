@@ -1,0 +1,229 @@
+<template>
+  <div>
+    <div style="display: flex; justify-content: space-around; margin-bottom: '10px'">
+      <Card v-for="(item, index) in nomiUseHoursData" :key="item.name" :style="{flex:1, margin:'0 8px', backgroundColor: colors[index]}" class="info-card">
+        <div style="padding: 16px">
+          <h2>{{item.value[item.value.length-1]}}</h2>
+          <h5>{{item.name}}</h5>
+          <p>{{(item.value.length-1) | fullHours}}-{{item.value.length | fullHours}}</p>
+        </div>
+        <chart auto-resize :options="getOption(item.value)" theme="light" style="width: 100%; height: 180px"></chart>
+      </Card>
+    </div>
+    <Card class="margin-bottom-10 margin-top-10">
+      <!-- <chart auto-resize :options="nomiUseHoursOption" theme="light" style="width: 100%;"></chart> -->
+      <chart auto-resize :options="nomiUseHoursDomainOption" theme="light" style="width: 100%;"></chart>
+    </Card>
+    <Divider>截止到前一个小时的总体数据</Divider>
+    <div style="display: flex; justify-content: space-around;">
+      <Card v-for="(item, index) in baseSummaryData" :key="item.name" :style="{textAlign: 'center', flex:1, margin:'0 16px', backgroundColor: colors[index]}">
+        <h2>{{item.value}}</h2>
+        <h5>{{item.name}}</h5>
+      </Card>
+    </div>
+    <AisTable :columns="topDomain.head" :data="topDomain.data" :show-page="false" table-title="Domain" class="margin-bottom-20 margin-top-10" />
+    <AisTable :columns="top10Intent.head" :data="top10Intent.data" :show-page="false" table-title="Top10Intent" class="margin-bottom-20" />
+    <AisTable :columns="topUser.head" :data="topUser.data" :show-page="false" table-title="活跃用户" class="margin-bottom-20" />
+    <AisTable :columns="topMonthUser.head" :data="topMonthUser.data" :show-page="false" table-title="近一个月活跃用户" class="margin-bottom-20" />
+  </div>
+</template>
+<script>
+import moment from 'moment';
+import api from '../../api/report';
+import StackLine from '../../components/Line/StackLine';
+export default {
+  components: {
+    StackLine
+  },
+  filters: {
+    fullHours: function(value) {
+      return String(value).padStart(2, '0') + ':00';
+    }
+  },
+  data() {
+    return {
+      today: '',
+      nomiUseSummary: null,
+      nomiUseHoursInfo: null,
+      colors: ['#00bebe', '#ffc107', '#f86c6b', '#20a8d8', '#63c2de', '#4dbd74', '#735973', '#96C5B0', '#E7AAB2']
+    }
+  },
+  computed: {
+    useNomiHoursKey() {
+      return `total.info.use_nomi_hours.d.${this.today}`;
+    },
+    useNomiSummaryKey() {
+      return `total.info.use_nomi.d.${this.today}`;
+    },
+    baseSummaryData() {
+      if (this.nomiUseSummary) {
+        return [{
+          name: '总唤醒次数',
+          value: this.nomiUseSummary.sessionCount,
+        }, {
+          name: '在线次数',
+          value: this.nomiUseSummary.onlineSessionCount,
+        }, {
+          name: '离线次数',
+          value: this.nomiUseSummary.offlineSessionCount,
+        }, {
+          name: '总Query数',
+          value: this.nomiUseSummary.queryCount,
+        }, {
+          name: '被唤醒过的城市数目',
+          value: this.nomiUseSummary.cityCount
+        }]
+      }
+      return [];
+    },
+    top10Intent() {
+      if (this.nomiUseSummary) {
+        return this.nomiUseSummary.intent;
+      }
+      return {
+        head: [],
+        data: []
+      };
+    },
+    topDomain() {
+      if (this.nomiUseSummary) {
+        return this.nomiUseSummary.domain;
+      }
+      return {
+        head: [],
+        data: []
+      };
+    },
+    topUser() {
+      if (this.nomiUseSummary) {
+        return this.nomiUseSummary.activeUser;
+      }
+      return {
+        head: [],
+        data: []
+      };
+    },
+    topMonthUser() {
+      if (this.nomiUseSummary) {
+        return this.nomiUseSummary.MonthActiveUser;
+      }
+      return {
+        head: [],
+        data: []
+      };
+    },
+    nomiUseHoursData() {
+      if (this.nomiUseHoursInfo) {
+        return [{
+          name: '用户(vid)数',
+          value: this.nomiUseHoursInfo.resultMap.vidCount
+        }, {
+          name: 'session数',
+          value: this.nomiUseHoursInfo.resultMap.sessionCount
+        }, {
+          name: 'query数',
+          value: this.nomiUseHoursInfo.resultMap.queryCount
+        }, {
+          name: '平均交互数',
+          value: this.nomiUseHoursInfo.resultMap.useNomiRate
+        }]
+      }
+      return [];
+    },
+    nomiUseHoursDomainOption() {
+      let series = [];
+      let xAxisData = Array.from(Array(24).keys()).map(num => String(num).padStart(2, '0'));
+      let legendData = [];
+      if (this.nomiUseHoursInfo) {
+        legendData = Object.keys(this.nomiUseHoursInfo.domainMap);
+        legendData.forEach((domain, index) => {
+          series.push({
+            name: domain,
+            type: 'line',
+            lineStyle: {
+              color: this.colors[index]
+            },
+            data: this.nomiUseHoursInfo.domainMap[domain]
+          })
+        })
+      }
+      return {
+        tooltip: {
+          trigger: 'axis'
+        },
+        color: this.colors,
+        legend: {
+          data: legendData,
+          icon: 'pin'
+        },
+        grid: {
+          left: '5%',
+          right: '5%',
+          bottom: '5%'
+        },
+        xAxis: {
+          boundaryGap: false,
+          data: xAxisData
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: series
+      };
+    }
+  },
+  created() {
+    this.today = moment().format('YYYYMMDD')
+    this.loadData();
+  },
+  methods: {
+    async loadData() {
+      let response = await api.getData([this.useNomiHoursKey, this.useNomiSummaryKey].join(','));
+      if (response.state === 'success') {
+        this.nomiUseSummary = response.data[this.useNomiSummaryKey];
+        this.nomiUseHoursInfo = response.data[this.useNomiHoursKey];
+      }
+    },
+    getOption(data) {
+      return {
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 5
+        },
+        xAxis: {
+          show: false,
+          type: 'category',
+          data: data.map((item, index) => String(index).padStart(2, '0'))
+        },
+        yAxis: {
+          show: false,
+          type: 'value',
+        },
+        series: [{
+          data: data,
+          type: 'line',
+          lineStyle: {
+            color: 'white',
+            opacity: 0.8
+          },
+          itemStyle: {
+            color: 'white'
+          }
+        }]
+      }
+    }
+  }
+}
+
+</script>
+<style scoped>
+.info-card>>>.ivu-card-body {
+  padding: 0;
+}
+
+</style>
