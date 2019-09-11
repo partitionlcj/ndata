@@ -41,13 +41,13 @@ export default {
     activeOption() {
       return {
         title: {
-          text: 'nomi日活度'
+          text: '日活度'
         },
         tooltip: {
           trigger: 'axis'
         },
         legend: {
-          data: ['活跃nomi', 'nomi日活率', '行驶率', '行车用户日活率']
+          data: ['活跃', '日活率', '行驶率', '行车用户日活率']
         },
         grid: {
           left: '3%',
@@ -80,13 +80,13 @@ export default {
           }
         }],
         series: [{
-          name: '活跃nomi',
+          name: '活跃',
           type: 'bar',
           yAxisIndex: 0,
           barWidth: '60%',
           data: this.activeNomi
         }, {
-          name: 'nomi日活率',
+          name: '日活率',
           type: 'line',
           yAxisIndex: 1,
           data: this.activeNomiRate
@@ -106,7 +106,7 @@ export default {
     activeRateOption() {
       return {
         title: {
-          text: 'nomi日活率'
+          text: '日活率'
         },
         toolbox: {
           feature: {
@@ -114,7 +114,7 @@ export default {
           }
         },
         legend: {
-          data: ['(活跃nomi)单车日均query', 'nomi日活率']
+          data: ['(活跃)单车日均query', '日活率']
         },
         grid: {
           left: '3%',
@@ -141,7 +141,7 @@ export default {
           }
         }],
         series: [{
-            name: '(活跃nomi)单车日均query',
+            name: '(活跃)单车日均query',
             type: 'line',
             yAxisIndex: 0,
             markLine: {
@@ -152,7 +152,7 @@ export default {
             data: this.activeNomiDailyQuery
           },
           {
-            name: 'nomi日活率',
+            name: '日活率',
             type: 'line',
             yAxisIndex: 1,
             markLine: {

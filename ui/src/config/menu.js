@@ -20,6 +20,11 @@ const REPORT = {
     to: '/fact_data',
     icon: 'md-grid',
     name: 'face-data'
+  },{
+    label: 'Debug',
+    to: '/debug',
+    icon: 'md-grid',
+    name: 'face-data'
   }, {
     label: '单日报表',
     to: '/report/daily',

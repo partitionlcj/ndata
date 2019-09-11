@@ -19,6 +19,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -31,8 +32,36 @@ public class ReportController {
 
     @Autowired
     JedisPool pool;
+
+    JedisPool wavPool = new JedisPool("10.86.11.20",31120);
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    @GetMapping("/audio/download_wav")
+    public void downloadWavByRid(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
+        String asrId = jdbcTemplate.queryForObject("select asr_id from voice_info_upload_record where request_id=?",new Object[]{rid}, String.class);
+        Jedis r = wavPool.getResource();
+        byte[] data = r.get((asrId+".wav").getBytes());
+        response.setContentType("audio/x-wav");
+        if( data != null ){
+            response.getOutputStream().write(data);
+            response.flushBuffer();
+        }
+        r.close();
+    }
+
+    @GetMapping("/ssdb/wav")
+    public void downloadWav(@RequestParam("key") String key, HttpServletResponse response) throws Exception {
+        Jedis r = wavPool.getResource();
+        byte[] data = r.get(key.getBytes());
+        response.setContentType("audio/x-wav");
+        if( data != null ){
+            response.getOutputStream().write(data);
+            response.flushBuffer();
+        }
+        r.close();
+    }
+
 
     @RequestMapping( value = "/ssdb/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSsdbData(@RequestParam(defaultValue = "") String keys) throws Exception {
@@ -107,6 +136,12 @@ public class ReportController {
 
         JsonObject rstItem = RestResult.pageResult(array.size(), pageIndex, pageSize, rst);
         return new ResponseEntity<Object>(RestResult.getSuccessResult(rstItem), HttpStatus.OK);
+    }
+
+    @GetMapping("/debug/output")
+    public ResponseEntity<Object> getOutput(@RequestParam("rid")String rid){
+        String output = jdbcTemplate.queryForObject("select output from debug_query where request_id=?", new Object[]{rid}, String.class);
+        return new ResponseEntity<Object>(RestResult.getSuccessResult(output), HttpStatus.OK);
     }
 
     @PostMapping("/sp/com/batch_comment")

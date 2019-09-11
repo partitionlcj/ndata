@@ -151,7 +151,7 @@ export default {
           key: 'queryInterregional',
           component: 'QueryInterregional'
         }, {
-          label: 'nomi日活跃情况',
+          label: '日活跃情况',
           key: 'active_nomi_daily',
           component: 'DailyActiveNomi'
         }, {

@@ -153,12 +153,31 @@ export default {
         title: '更新时间',
         key: 'updated_at',
         minWidth: 100,
+      }, {
+        title: '详情',
+        width: 100,
+        align: 'center',
+        key: 'detail',
+        render: (h, params) => {
+          return h('Button', {
+            props: {
+              type: 'primary',
+              size: 'small'
+            },
+            on: {
+              click: () => {
+                this.currentViewRow = params.row._index;
+                this.viewDetail(params.row.session_id,params.row.request_id);
+              }
+            }
+          }, '详情');
+        }
       });
       return columns;
     }
   },
   beforeMount() {
-    this.reportName = this.$route.name;
+    this.reportName = 'fact-data';
     this.domain = this.$route.params.domain;
     this.intent = this.$route.params.intent === 'null' ? '' : this.$route.params.intent;
     let now = util.getTodayDate();
@@ -192,7 +211,7 @@ export default {
       this.loading = true;
       let response;
       if (this.reportName === 'fact-data') {
-        response = await api.getFactData(begin_date, end_date, sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), this.pagination.page, this.pagination.pageSize);
+        response = await api.getDebugData(begin_date, end_date, sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), this.pagination.page, this.pagination.pageSize);
       } else {
         response = await api.getDomainIntentQueryDetail(this.domain.toLowerCase(), this.intent.toLowerCase(), begin_date, end_date, `%${query}%`, this.pagination.page, this.pagination.pageSize);
       }
@@ -230,6 +249,7 @@ export default {
       let response = await api.getRequestInfo(requestId);
       if (response.state === 'success') {
         this.sysResult = response.data;
+        console.log(this.sysResult)
         this.showModal = true;
       }
     },

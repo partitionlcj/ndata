@@ -1,28 +1,8 @@
 <template>
   <div>
-    <Modal :value="value" title="viewText & TTS" :closable="false" @on-visible-change="visibleChange">
-      <div v-for="(i, index) in data" :key="'query'+index" class="margin-bottom-20">
-        <p class="query">【{{i.query}}】</p>
-        <div class="label-text">TTS</div>
-        <ul class="tts margin-bottom-20">
-          <li v-for="(item, index) in i.final_tts" :key="'tts'+index">{{item}}</li>
-        </ul>
-        <span class="label-text">ViewText</span>
-        <ul class="tts">
-          <li v-for="(item, index) in i.final_view_text" :key="'view'+index">{{item}}</li>
-        </ul>
-      </div>
-      <div v-if="showSubmitToFb">
-        <fieldset style="padding: 10px">
-          <legend>反馈信息</legend>
-          <CheckboxGroup v-model="fbInfo.reason" class="margin-bottom-20">
-            <Checkbox v-for="type in problemTypes" :key="type" :label="type"></Checkbox>
-          </CheckboxGroup>
-          <Input type="textarea" placeholder="请输入你的备注" v-model.trim="fbInfo.comment"></Input>
-        </fieldset>
-      </div>
-      <div slot="footer">
-        <Button type="error" long @click="submitToFb">提交到反馈系统</Button>
+    <Modal title="Output" :value="value" :closable="false" @on-visible-change="visibleChange" width="600px">
+      <div>
+        <pre>{{ json_txt }}</pre>
       </div>
     </Modal>
   </div>
@@ -34,13 +14,7 @@ export default {
   props: {
     value: Boolean,
     data: {
-      type: Array,
-      default: () => []
-    },
-    sessionId: String,
-    showSubmitToFb: {
-      type: Boolean,
-      default: true
+      type: String
     }
   },
   data() {
@@ -52,10 +26,14 @@ export default {
       }
     }
   },
-  watch: {
-    value() {
-      this.fbInfo.reason = [];
-      this.fbInfo.comment = '';
+  computed: {
+    json_txt() { 
+      if( this.data != null && this.data.length > 2){
+        return JSON.stringify(JSON.parse(this.data), null, 4)
+      }
+      else{ 
+        return '';
+      }
     }
   },
   methods: {

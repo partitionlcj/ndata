@@ -16,6 +16,8 @@ const FbIntentReport = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbIntentReport');
 const FbQueryDetail = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbQueryDetail');
+  const FbQueryDetailDebug = () =>
+  import( /* webpackChunkName: "report" */ './views/report/FbQueryDetailDebug');
 const FbReport = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbReport');
 const FbBadcase = () =>
@@ -92,6 +94,20 @@ const routes = [{
     component: FbReport
   }]
 }, {
+  path: '/debug',
+  component: Main,
+  children: [{
+    path: '',
+    name: 'debug',
+    meta: {
+      bread: [{
+        label: 'debug',
+        to: '/debug'
+      }],
+    },
+    component: FbQueryDetailDebug
+  }]
+},{
   path: '/fact_data',
   component: Main,
   children: [{

@@ -62,11 +62,23 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
-  getRequestInfo(sessionId) {
-    return base('post', ASSIGN.requestInfo, {
-      class_name: "NdataReqInfoQuery",
-      session_id: sessionId
+  getDebugData(begin_date, end_date, sessionId, query, domain, vid, operation, intent, pageIndex, pageSize) {
+    return base('post', COMMON.report, {
+      report_name: "debug",
+      pageIndex,
+      pageSize,
+      begin_date,
+      end_date,
+      query: `%${query}%`,
+      session_id: `%${sessionId}%`,
+      domain: `%${domain}%`,
+      vid: `%${vid}%`,
+      intents: `%${intent}%`,
+      operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
+  },
+  getRequestInfo(requestId) {
+    return base('get', '/api/debug/output?rid='+requestId)
   },
   readSsdb(key, page, pageSize) {
     return base('post', COMMON.readSsdb, {
