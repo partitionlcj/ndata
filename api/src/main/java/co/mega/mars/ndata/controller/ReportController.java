@@ -34,20 +34,29 @@ public class ReportController {
     JedisPool pool;
 
     JedisPool wavPool = new JedisPool("10.86.11.20",31120);
+    JedisPool devWavPool = new JedisPool("10.25.9.37",13231);
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @GetMapping("/audio/download_wav")
     public void downloadWavByRid(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
-        String asrId = jdbcTemplate.queryForObject("select asr_id from voice_info_upload_record where request_id=?",new Object[]{rid}, String.class);
-        Jedis r = wavPool.getResource();
-        byte[] data = r.get((asrId+".wav").getBytes());
-        response.setContentType("audio/x-wav");
-        if( data != null ){
-            response.getOutputStream().write(data);
-            response.flushBuffer();
+        try(Jedis dr = devWavPool.getResource()) {
+            String asrId = rid;
+            byte[] data = dr.get((asrId).getBytes());
+
+            if (data == null || data.length == 0) {
+                try(Jedis r = wavPool.getResource()) {
+                    asrId = jdbcTemplate.queryForObject("select asr_id from voice_info_upload_record where request_id=?", new Object[]{rid}, String.class);
+                    data = r.get((asrId + ".wav").getBytes());
+                }
+            }
+
+            response.setContentType("audio/x-wav");
+            if (data != null) {
+                response.getOutputStream().write(data);
+                response.flushBuffer();
+            }
         }
-        r.close();
     }
 
     @GetMapping("/ssdb/wav")
