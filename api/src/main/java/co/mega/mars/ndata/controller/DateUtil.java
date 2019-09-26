@@ -1,16 +1,10 @@
 package co.mega.mars.ndata.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.TimeZone;
 
 public class DateUtil {
     public static final Long ONE_DAY_IN_MILLISECOND = 1L * 24 * 60 * 60 * 1000;
-
-    private static final ThreadLocal<Calendar> threadLocal = ThreadLocal.withInitial(()->Calendar.getInstance());
-    private static final ThreadLocal<DateFormat> dateFormatThreadLocal = ThreadLocal.withInitial(()->new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-    private static final ThreadLocal<DateFormat>dayFormatThreadLocal = ThreadLocal.withInitial(()->new SimpleDateFormat("yyyyMMdd"));
 
     public static long getMillisecond(Calendar calendar) {
         return calendar.getTimeInMillis();
@@ -18,7 +12,7 @@ public class DateUtil {
 
     public static long getMillisecond(String date) {
         String[] arr = date.split("-");
-        Calendar calendar = threadLocal.get();
+        Calendar calendar = Calendar.getInstance();
 
         calendar.set(Calendar.YEAR, Integer.parseInt(arr[0]));
         calendar.set(Calendar.MONTH, Integer.parseInt(arr[1]) - 1);
@@ -36,14 +30,13 @@ public class DateUtil {
     }
 
     public static String formatDate(long millisecond) {
-        return dateFormatThreadLocal.get().format(new Date(millisecond));
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT-5"));
+        c.setTimeInMillis(millisecond);
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(c.get(Calendar.YEAR)).append("-").append(c.get(Calendar.MONTH)).append("-").append(c.get(Calendar.DAY_OF_MONTH))
+                .append(" ").append(c.get(Calendar.HOUR_OF_DAY)).append(":").append(c.get(Calendar.MINUTE)).append(":").append(c.get(Calendar.SECOND));
+        return sb.toString();
     }
 
-    public static long parseMillisecond(String date) throws Exception {
-        return dateFormatThreadLocal.get().parse(date).getTime();
-    }
-
-    public static String dayFormat() throws Exception {
-        return dayFormatThreadLocal.get().format(new Date());
-    }
 }

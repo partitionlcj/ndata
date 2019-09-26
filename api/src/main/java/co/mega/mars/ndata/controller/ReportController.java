@@ -187,10 +187,6 @@ public class ReportController {
 
         String reportSql = reportMetaData.get("report_sql").getAsString();
 
-        // 调整时区
-        if ("sariel".equals(reportMetaData.get("db_name").getAsString()))
-            jdbcTemplate.update("set time_zone = '+08:00'");
-
         int total = 0;
         if (GsonUtil.getAsInt(queryParam, "pageIndex", 0) == 0 && GsonUtil.getAsInt(queryParam, "pageSize", 0) == 0) {
             total = 1;
