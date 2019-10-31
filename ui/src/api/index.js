@@ -62,7 +62,7 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
-  getDebugData(begin_date, end_date, sessionId, query, domain, vid, operation, intent, pageIndex, pageSize) {
+  getDebugData(begin_date, end_date, sessionId, query, domain, vid, operation, intent, env, pageIndex, pageSize) {
     return base('post', COMMON.report, {
       report_name: "debug",
       pageIndex,
@@ -74,6 +74,7 @@ export default {
       domain: `%${domain}%`,
       vid: `%${vid}%`,
       intents: `%${intent}%`,
+      env: `%${env}%`,
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },

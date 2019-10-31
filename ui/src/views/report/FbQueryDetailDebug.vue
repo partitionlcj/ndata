@@ -10,7 +10,7 @@
         <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="6" class="margin-bottom-10">
-        <Input placeholder="vin" v-model="filter.vin" @on-enter="pageChange(1)"></Input>
+        <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
       <Col span="6" class="margin-bottom-10">
@@ -64,7 +64,7 @@ export default {
       filter: {
         date: [],
         query: '',
-        vin: '',
+        env: '',
         domain: '',
         vid: '',
         operation: '',
@@ -111,23 +111,23 @@ export default {
         }, {
           title: 'domain',
           key: 'domain',
-          minWidth: 100
+          minWidth: 60
         });
       }
       columns.push({
         title: 'query',
         key: 'query',
-        minWidth: 100,
+        minWidth: 150,
       });
       columns.push({
         title: 'tts',
-        minWidth: 100,
+        minWidth: 200,
         render: (h, params) => {
           let tts = JSON.parse(params.row.tts);
           return h('ul', tts.map(item => h('li', item.content)));
         }
       });
-      if (this.reportName === 'fact-data') {
+      //if (this.reportName === 'fact-data') {
         columns.push({
           title: 'intent',
           key: 'intent',
@@ -136,6 +136,10 @@ export default {
           title: 'operation',
           key: 'operation',
           minWidth: 100
+        }, {
+          title: 'env',
+          key: 'env',
+          minWidth: 80
         }, {
           title: '音频',
           width: 80,
@@ -148,7 +152,7 @@ export default {
             })
           }
         })
-      }
+      //}
       columns.push({
         title: '更新时间',
         key: 'updated_at',
@@ -200,7 +204,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { sessionId, query, domain, operation, intent, vid } = this.filter;
+      let { sessionId, query, domain, operation, intent, vid, env } = this.filter;
 
       operation = operation
 
@@ -211,7 +215,7 @@ export default {
       this.loading = true;
       let response;
       if (this.reportName === 'fact-data') {
-        response = await api.getDebugData(begin_date, end_date, sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), this.pagination.page, this.pagination.pageSize);
+        response = await api.getDebugData(begin_date, end_date, sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), this.pagination.page, this.pagination.pageSize);
       } else {
         response = await api.getDomainIntentQueryDetail(this.domain.toLowerCase(), this.intent.toLowerCase(), begin_date, end_date, `%${query}%`, this.pagination.page, this.pagination.pageSize);
       }
@@ -227,6 +231,7 @@ export default {
         updated_at: item[1],
         tts: item[2],
         request_id: item[9],
+        env: item[10],
         hasSubmited: false
       }));
       // let commentRes = await api.getComments(this.data.map(item => item.session_id));
