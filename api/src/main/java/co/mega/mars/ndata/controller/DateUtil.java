@@ -30,12 +30,12 @@ public class DateUtil {
     }
 
     public static String formatDate(long millisecond) {
-        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT-5"));
-        c.setTimeInMillis(millisecond);
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
+        c.setTimeInMillis(millisecond - 13*3600000);
         StringBuilder sb = new StringBuilder();
 
         sb.append(c.get(Calendar.YEAR)).append("-").append(c.get(Calendar.MONTH)+1).append("-").append(c.get(Calendar.DAY_OF_MONTH))
-                .append(" ").append(c.get(Calendar.HOUR_OF_DAY)).append(":").append(c.get(Calendar.MINUTE)).append(":").append(c.get(Calendar.SECOND));
+                .append(" ").append(c.get(Calendar.HOUR_OF_DAY) - 1).append(":").append(c.get(Calendar.MINUTE)).append(":").append(c.get(Calendar.SECOND));
         return sb.toString();
     }
 
