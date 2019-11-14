@@ -177,6 +177,26 @@ export default {
           }, '详情');
         }
       });
+      columns.push({
+        title: 'ReqInfo',
+        width: 100,
+        align: 'center',
+        key: 'detail',
+        render: (h, params) => {
+          return h('Button', {
+            props: {
+              type: 'primary',
+              size: 'small'
+            },
+            on: {
+              click: () => {
+                this.currentViewRow = params.row._index;
+                window.open("/api/debug/getReqInfo?rid="+params.row.request_id, "_blank")
+              }
+            }
+          }, 'ReqInfo');
+        }
+      })
       return columns;
     }
   },

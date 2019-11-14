@@ -147,6 +147,21 @@ public class ReportController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(rstItem), HttpStatus.OK);
     }
 
+    private static final String[] JSON_COLUMNS = {"input","output","nlp_result","model_result","rule_da_result","nlu_result","server_state","model_results"};
+    @GetMapping("/debug/getReqInfo")
+    public ResponseEntity<Object> getReqInfo(@RequestParam("rid")String rid){
+        Map r = jdbcTemplate.queryForMap("select * from dialogue.request_info where id=?", new Object[]{rid});
+        Arrays.stream(JSON_COLUMNS).forEach((c)->convert2Json(c,r));
+        return new ResponseEntity<Object>(GsonUtil.instance().toJson(r), HttpStatus.OK);
+    }
+
+    private void convert2Json(String k, Map m){
+        String v = (String) m.get(k);
+        if( v == null)return;
+        JsonObject o = GsonUtil.instance().fromJson(v, JsonObject.class);
+        m.put(k,o);
+    }
+
     @GetMapping("/debug/output")
     public ResponseEntity<Object> getOutput(@RequestParam("rid")String rid){
         String output = jdbcTemplate.queryForObject("select output from debug_query where request_id=?", new Object[]{rid}, String.class);
