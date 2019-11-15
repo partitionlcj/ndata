@@ -157,9 +157,13 @@ public class ReportController {
 
     private void convert2Json(String k, Map m){
         String v = (String) m.get(k);
-        if( v == null)return;
-        JsonObject o = GsonUtil.instance().fromJson(v, JsonObject.class);
-        m.put(k,o);
+        if( v == null || "null".equals(v))return;
+        try {
+            JsonObject o = GsonUtil.instance().fromJson(v, JsonObject.class);
+            m.put(k, o);
+        }catch (Exception ex){
+            logger.error("failed to convert {} to json object ", v,ex);
+        }
     }
 
     @GetMapping("/debug/output")
