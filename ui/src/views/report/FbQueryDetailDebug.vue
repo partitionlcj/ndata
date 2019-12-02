@@ -151,7 +151,27 @@ export default {
               }
             })
           }
-        })
+        },
+        {
+          title: '唤醒音频',
+          width: 80,
+          render: (h, params) => {
+            console.log(params.row)
+            if( params.row.wakeup === 1){
+              return h('AisAudio', {
+                props: {
+                  url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
+                  size: 14
+                }
+              })
+            }
+            else{
+              return h('div', "N/A")
+            }
+            
+          }
+        },
+        )
       //}
       columns.push({
         title: '更新时间',
@@ -252,6 +272,7 @@ export default {
         tts: item[2],
         request_id: item[9],
         env: item[10],
+        wakeup: item[11],
         hasSubmited: false
       }));
       // let commentRes = await api.getComments(this.data.map(item => item.session_id));

@@ -117,14 +117,13 @@ class HuDataTracking(object):
 
         # ssdb_save("vid.client_version." + self.vehicle_id, self.client_version)
 
-        if self.query == None or len(self.query) == 0:
-            return
+        #if self.query == None or len(self.query) == 0:
+        #    return
         # self.ts= datetime.datetime.fromtimestamp(ri['timestamp']/1000).isoformat()
         self.ts = ri['timestamp'] / 1000
         r = json.loads(ri['nlu_result'])
-        if r == None:
-            return
-        self.domain = r.get('domain', '')
+        if r != None:
+            self.domain = r.get('domain', '')
 
         input = json.loads(ri['input'])
         self.query_inhouse = input.get('queryInhouse',None)
@@ -135,7 +134,7 @@ class HuDataTracking(object):
         self.sd_ver = extra.get('sdVer',None)
         self.sound_location = extra.get('soundLocation',None)
 
-        if 'intentList' in r and len(r['intentList']) > 0:
+        if r != None and 'intentList' in r and len(r['intentList']) > 0:
             intents = ''
             for i in r['intentList']:
                 if len(intents) == 0:
@@ -164,10 +163,8 @@ class HuDataTracking(object):
 
             self.operations = ",".join(opTypes)
 
-        if 'multiRoundLabel' in r and r['multiRoundLabel']:
-            r['multi_round'] = 1
-        else:
-            r['multi_round'] = 0
+        if r != None and  'multiRoundLabel' in r and r['multiRoundLabel']:
+            self.multi_round = 1
 
         ss = json.loads(ri['server_state'])
 
@@ -226,20 +223,21 @@ def pipeline():
     total_query = 0
     insert_query = 0
 
-    ts = int(time.time()*1000) - 4*60*60*1000
-    ts_end = ts + 4*60*60*1000
+    ts = int(time.time()*1000) - 7*24*60*60*1000
+    ts_end = ts + 7*24*60*60*1000
     vid_ts = {}
 
-    with db_ri_new.cursor() as c1, db.cursor() as c2:
+    with db_ri.cursor() as c1, db.cursor() as c2:
         rids = get_exist_rids(c2,ts)
         print(f"{len(rids)} already inserted.")
-        print("select * from request_info where length(query)>0 and `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
-        c1.execute("select * from request_info where length(query)>0 and `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
+        print("select * from request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
+        c1.execute("select * from request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
         rs1 = c1.fetchall()
 
         for r1 in rs1:
             rid = r1.get('id')
             vid = r1.get('vehicle_id')
+            env = r1.get('env')
             ts2 = r1.get('timestamp')
             total_query += 1
 
@@ -250,26 +248,41 @@ def pipeline():
                 hdt.get_req_infos(r1)
                 insert_query += 1
 
-                if audio_dump(rid,ts2):
+                provider = 'aws'
+                if env.find('ds-gn') >= 0:
+                    provider = 'hw'
+
+                if audio_dump(rid,ts2,provider):
                     pcm2wav(rid)
                     save2ssdb(rid)
 
         print(f"total {total_query} queries, insert {insert_query} queries")
 
-
-
-def audio_dump(rid, ts):
+def audio_dump(rid, ts, provider='aws'):
     dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
-    s3 = boto3.resource('s3')
+    bucket = BUCKET_NAME
+
+    if provider == 'hw':
+        bucket = 'ais-storage-gz'
+        print('hw')
+        s3 = boto3.resource(
+                    's3',
+                    aws_access_key_id='NQBXVLYGNC5ZAL6WLHQV',
+                    aws_secret_access_key='fD0f9rCHd3fAYl0bewgoZI7VyxO4hp1e4BasEoJW',
+                    endpoint_url='http://obs.cn-south-1.myhuaweicloud.com/'
+                  )
+    else:
+        s3 = boto3.resource('s3')
+    
     KEY = 'audio_data/'+ dt +'/' + rid
 
     try:
         print(KEY)
-        s3.Bucket(BUCKET_NAME).download_file(KEY, rid)
+        s3.Bucket(bucket).download_file(KEY, rid)
         return True
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            print("The object does not exist.")
+            print("The "+provider+" object does not exist.")
             return False
         else:
             raise
@@ -284,6 +297,7 @@ def pcm2wav(rid):
 def save2ssdb(rid):
     with open( rid + '.wav', 'rb') as wavfile:
         data = wavfile.read()
+        print(rid+".wav")
         ssdb_save(rid,data)
     os.remove(rid)
     os.remove(rid+".wav")
@@ -292,7 +306,7 @@ def save2ssdb(rid):
 if __name__ == '__main__':
     init()
     db = conn['db']
-    db_ri_new = conn['db_ri_new']
+    db_ri = conn['db_ri']
 
     pipeline()
     

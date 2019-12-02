@@ -38,6 +38,20 @@ public class ReportController {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @GetMapping("/audio/wakeup_wav")
+    public void downloadWakeupWav(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
+        try(Jedis dr = devWavPool.getResource()) {
+            String asrId = "WAKEUP_"+rid;
+            byte[] data = dr.get((asrId).getBytes());
+
+            response.setContentType("audio/x-wav");
+            if (data != null) {
+                response.getOutputStream().write(data);
+                response.flushBuffer();
+            }
+        }
+    }
+
     @GetMapping("/audio/download_wav")
     public void downloadWavByRid(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
         try(Jedis dr = devWavPool.getResource()) {
