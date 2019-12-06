@@ -31,25 +31,15 @@ def init():
         cursorclass=pymysql.cursors.DictCursor,
     )
 
-    conn['db_ri_new'] = pymysql.connect(
-        host='localhost',
+    conn['db_ri'] = pymysql.connect(
+        host='10.25.9.37',
         port=3306,
-        user='dialogue_w',
-        password='NjhiNzhkNDM5NmUwM2Iz',
+        user='ais-dev',
+        password='QAdr45mfrkled',
         db='dialogue',
         charset='utf8mb4',
-        cursorclass=pymysql.cursors.DictCursor
+        cursorclass=pymysql.cursors.DictCursor,
     )
-
-def get_all_ru_vids():
-    with conn['db'].cursor() as c:
-        vids = []
-        c.execute('SELECT vehicle_id FROM `es8_delivery` where type=1')
-        rs = c.fetchall()
-        for r in rs:
-            vid = str(r.get('vehicle_id'))
-            vids.append(vid)
-        return vids
 
 def get_yly():
     data = {}
