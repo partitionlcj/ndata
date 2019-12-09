@@ -2,14 +2,17 @@
   <div>
     <InfoModal v-model="showModal" :data="sysResult"></InfoModal>
     <Row class="margin-bottom-20" :gutter="16">
-      <Col span="6" class="margin-bottom-10">
-      <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
+      <Col span="4" class="margin-bottom-10">
+        <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
       </Col>
       <template v-if="reportName=='fact-data'">
-        <Col span="6" class="margin-bottom-10">
-        <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
+        <Col span="4" class="margin-bottom-10">
+          <Input placeholder="request_id" v-model="filter.requestId" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="6" class="margin-bottom-10">
+        <Col span="4" class="margin-bottom-10">
+          <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
+        </Col>
+        <Col span="2" class="margin-bottom-10">
         <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
@@ -17,17 +20,20 @@
       <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
       </Col>
       <template v-if="reportName=='fact-data'">
-        <Col span="6" class="margin-bottom-10">
+        <Col span="4" class="margin-bottom-10">
         <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="6" class="margin-bottom-10">
+        <Col span="4" class="margin-bottom-10">
         <Input placeholder="domain" v-model="filter.domain" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="6" class="margin-bottom-10">
+        <Col span="4" class="margin-bottom-10">
         <Input placeholder="operation;搜空请输入null" v-model="filter.operation" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="6" class="margin-bottom-10">
-        <Input placeholder="intent" v-model="filter.intent" @on-enter="pageChange(1)"></Input>
+        <Col span="4" class="margin-bottom-10">
+          <Input placeholder="intent" v-model="filter.intent" @on-enter="pageChange(1)"></Input>
+        </Col>
+         <Col span="2" class="margin-bottom-10">
+          <Input placeholder="唤醒词" v-model="filter.wakeup_asr_text" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
       </Col>
@@ -69,7 +75,9 @@ export default {
         vid: '',
         operation: '',
         intent: '',
-        sessionId: ''
+        sessionId: '',
+        requestId: '',
+        wakeup_asr_text: ''
       },
       data: [],
       currentViewRow: -1
@@ -84,10 +92,22 @@ export default {
   },
   computed: {
     columns() {
-      let columns = [{
-        title: 'sessionId',
+      let columns = [
+        {
+        title: 'reqId',
+        key: 'request_id',
+        width: 80,
+        render: (h, params) => {
+          return h('Tooltip', {
+            props: {
+              content: params.row.request_id
+            }
+          }, params.row.request_id.slice(params.row.request_id.length - 5));
+        }
+      },{
+        title: 'sesId',
         key: 'session_id',
-        width: 100,
+        width: 80,
         render: (h, params) => {
           return h('Tooltip', {
             props: {
@@ -95,12 +115,13 @@ export default {
             }
           }, params.row.session_id.slice(params.row.session_id.length - 5));
         }
-      }]
+      }
+      ]
       if (this.reportName === 'fact-data') {
         columns.push({
           title: 'vid',
           key: 'vid',
-          width: 100,
+          width: 80,
           render: (h, params) => {
             return h('Tooltip', {
               props: {
@@ -111,7 +132,7 @@ export default {
         }, {
           title: 'domain',
           key: 'domain',
-          minWidth: 60
+          minWidth: 70
         });
       }
       columns.push({
@@ -142,7 +163,7 @@ export default {
           minWidth: 80
         }, {
           title: '音频',
-          width: 80,
+          width: 70,
           render: (h, params) => {
             return h('AisAudio', {
               props: {
@@ -153,8 +174,8 @@ export default {
           }
         },
         {
-          title: '唤醒音频',
-          width: 80,
+          title: '唤醒',
+          width: 90,
           render: (h, params) => {
             console.log(params.row)
             if( params.row.wakeup === 1){
@@ -171,6 +192,11 @@ export default {
             
           }
         },
+        {
+          title: '唤醒词',
+          key: 'wakeup_asr_text',
+          minWidth: 100,
+        }
         )
       //}
       columns.push({
@@ -244,7 +270,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { sessionId, query, domain, operation, intent, vid, env } = this.filter;
+      let { requestId, sessionId, query, domain, operation, intent, vid, env, wakeup_asr_text } = this.filter;
 
       operation = operation
 
@@ -255,7 +281,7 @@ export default {
       this.loading = true;
       let response;
       if (this.reportName === 'fact-data') {
-        response = await api.getDebugData(begin_date, end_date, sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), this.pagination.page, this.pagination.pageSize);
+        response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), this.pagination.page, this.pagination.pageSize);
       } else {
         response = await api.getDomainIntentQueryDetail(this.domain.toLowerCase(), this.intent.toLowerCase(), begin_date, end_date, `%${query}%`, this.pagination.page, this.pagination.pageSize);
       }
@@ -273,16 +299,9 @@ export default {
         request_id: item[9],
         env: item[10],
         wakeup: item[11],
+        wakeup_asr_text: item[12],
         hasSubmited: false
       }));
-      // let commentRes = await api.getComments(this.data.map(item => item.session_id));
-      // if (commentRes.state === 'success') {
-      //   commentRes.data.forEach((item, index) => {
-      //     if (!!item) {
-      //       this.data[index].hasSubmited = true;
-      //     }
-      //   });
-      // }
       this.pagination.total = data.total;
     },
     pageChange(page) {

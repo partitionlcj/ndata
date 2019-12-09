@@ -62,19 +62,21 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
-  getDebugData(begin_date, end_date, sessionId, query, domain, vid, operation, intent, env, pageIndex, pageSize) {
+  getDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, pageIndex, pageSize) {
     return base('post', COMMON.report, {
-      report_name: "debug",
+      report_name: "debug1",
       pageIndex,
       pageSize,
       begin_date,
       end_date,
+      request_id: `%${requestId}%`,
       query: `%${query}%`,
       session_id: `%${sessionId}%`,
       domain: `%${domain}%`,
       vid: `%${vid}%`,
       intents: `%${intent}%`,
       env: `%${env}%`,
+      wakeup_asr_text: `%${wakeup_asr_text}%`,
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
