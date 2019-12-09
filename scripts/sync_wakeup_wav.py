@@ -19,22 +19,25 @@ def pipeline():
     ts = int(time.time()*1000) - 7*24*60*60*1000
 
     with conn['db_ri'].cursor() as c1, conn['db'].cursor() as c2:
-        c1.execute("select id,env,`timestamp` from wakeup_info where `timestamp` >= %s", ts)
+        c1.execute("select * from wakeup_info where `timestamp` >= %s", ts)
         rs = c1.fetchall()
         for r in rs:
             rid = r.get('id')
+            asr_text = r.get('asr_text')
+            if asr_text != None:
+                asr_text = asr_text.upper()
             if ssdb_get('WAKEUP_'+rid) == None:
                 if download_wav(rid,r.get('timestamp'),r.get('env')):
-                    c2.execute('update debug_query set wakeup=1 where request_id=%s',rid)
+                    c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
                     conn['db'].commit()
                     print("sync ri status " + rid)
             else:
-                c2.execute('select wakeup from debug_query where request_id=%s',rid)
+                c2.execute('select * from debug_query where request_id=%s',rid)
                 rs = c2.fetchone()
                 if rs != None:
-                    #print(rs.get('wakeup'))
-                    if rs.get('wakeup') == None:
-                        c2.execute('update debug_query set wakeup=1 where request_id=%s',rid)
+                    wat = rs.get('wakeup_asr_text')
+                    if wat == None or wat == '' :
+                        c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
                         conn['db'].commit()
                         print("[fix] sync ri status " + rid)
 
