@@ -161,20 +161,23 @@ public class ReportController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(rstItem), HttpStatus.OK);
     }
 
-    private static final String[] JSON_COLUMNS = {"input","output","nlp_result","model_result","rule_da_result","nlu_result","server_state","model_results"};
+    private static final String[] JSON_COLUMNS = {"input","output","nlp_result","model_results","rule_da_result","nlu_result","server_state"};
     @GetMapping("/debug/getReqInfo")
     public ResponseEntity<Object> getReqInfo(@RequestParam("rid")String rid){
         Map r = jdbcTemplate.queryForMap("select * from dialogue.request_info where id=?", new Object[]{rid});
-        Arrays.stream(JSON_COLUMNS).forEach((c)->convert2Json(c,r));
-        return new ResponseEntity<Object>(GsonUtil.instance().toJson(r), HttpStatus.OK);
+        JsonArray jr = new JsonArray();
+        Arrays.stream(JSON_COLUMNS).forEach((c)->convert2Json(c,r ,jr));
+        return new ResponseEntity<Object>(GsonUtil.instance().toJson(jr), HttpStatus.OK);
     }
 
-    private void convert2Json(String k, Map m){
+    private void convert2Json(String k, Map m, JsonArray jr){
         String v = (String) m.get(k);
         if( v == null || "null".equals(v))return;
         try {
             JsonObject o = GsonUtil.instance().fromJson(v, JsonObject.class);
-            m.put(k, o);
+            JsonObject big = new JsonObject();
+            big.add(k,o);
+            jr.add(big);
         }catch (Exception ex){
             logger.error("failed to convert {} to json object ", v,ex);
         }
