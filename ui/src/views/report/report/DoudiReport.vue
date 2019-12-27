@@ -62,7 +62,7 @@ export default {
       return this.getCTableData(dict, this.data, total);
     },
     reportKey() {
-      return `base.${this.report}.${this.reportType}.${this.date}`;
+      return `ds-mars-prod.base.${this.report}.${this.reportType}.${this.date}`;
     }
   },
   beforeMount() {

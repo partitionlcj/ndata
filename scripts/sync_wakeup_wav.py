@@ -36,7 +36,7 @@ def pipeline():
                 rs = c2.fetchone()
                 if rs != None:
                     wat = rs.get('wakeup_asr_text')
-                    if wat == None or wat == '' :
+                    if wat == None or len(wat) == 0 :
                         c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
                         conn['db'].commit()
                         print("[fix] sync ri status " + rid)

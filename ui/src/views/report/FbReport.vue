@@ -130,17 +130,6 @@ export default {
         component: 'MostUsedQuery'
       }]
 
-      if (this.type !== 'monthly') {
-        tabs.push({
-          label: '前端性能报表(图)',
-          key: 'nomi.perf',
-          component: 'PerformanceReportChart'
-        }, {
-          label: '前端性能报表(表)',
-          key: 'nomi.perf',
-          component: 'PerformanceReportTable'
-        });
-      }
       if (this.type === 'monthly') {
         tabs.push({
           label: 'vid.usage',
@@ -159,13 +148,6 @@ export default {
           key: 'vehicle.driving',
           component: 'VidDataview'
         })
-      }
-      if (this.type === 'daily') {
-        tabs.push({
-          label: '客户端版本',
-          key: 'client_version',
-          component: 'HuashuReport'
-        });
       }
       return tabs
     },

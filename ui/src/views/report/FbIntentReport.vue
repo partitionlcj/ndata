@@ -61,7 +61,7 @@ export default {
   },
   computed: {
     key() {
-      return `total.intents.${this.domain.toLowerCase()}`;
+      return `ds-mars-prod.total.intents.${this.domain.toLowerCase()}`;
     }
   },
   watch: {

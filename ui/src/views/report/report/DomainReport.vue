@@ -19,7 +19,7 @@ export default {
   },
   computed: {
     reportKey() {
-      return `base.${this.report}.${this.reportType}.${this.date}`;
+      return `ds-mars-prod.base.${this.report}.${this.reportType}.${this.date}`;
     }
   },
   beforeMount() {

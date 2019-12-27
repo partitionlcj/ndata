@@ -126,6 +126,10 @@ def ssdb_save(key,v):
     print(key)
     conn['ssdb'].set(key,v)
 
+def ssdb_save_json(key,v):
+    print(key)
+    conn['ssdb'].set(key,json.dumps(v))
+
 def date_count(c,sql,date_count):
     c.execute(sql,date_count)
     rs = c.fetchall()

@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     key() {
-      return `total.${this.currentType}`;
+      return `ds-mars-prod.total.${this.currentType}`;
     },
     pieTitle() {
       return `实车 ${this.currentType} 分布`

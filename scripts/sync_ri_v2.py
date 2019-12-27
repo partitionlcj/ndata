@@ -223,8 +223,10 @@ def pipeline():
     total_query = 0
     insert_query = 0
 
-    ts = int(time.time()*1000) - 7*24*60*60*1000
-    ts_end = ts + 7*24*60*60*1000
+    back_time = 7*24*60*60*1000
+
+    ts_end = int(time.time()*1000) 
+    ts = ts_end - back_time
     vid_ts = {}
 
     with db_ri.cursor() as c1, db.cursor() as c2:
