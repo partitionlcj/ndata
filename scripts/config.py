@@ -18,6 +18,8 @@ type2_intents = set(
         ' '))
 type3 = '10058 10018 10019 10021'.split(" ")
 
+env='ds-mars-prod'
+
 def init():
     #conn['ssdb'] = pyssdb.Client(host='10.86.11.20',port=31120)
     conn['ssdb'] = pyssdb.Client(host='10.25.9.37',port=13231)

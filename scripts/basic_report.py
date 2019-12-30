@@ -4,8 +4,6 @@ from call_funnel import *
 import retention
 from datetime import datetime, timedelta, date
 
-env='ds-mars-prod'
-
 def hot_domains(c,date_range,key):
     domain_count = date_count(c, f"select domain as ts,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by domain order by c desc",date_range)
     ssdb_save_json(f"{env}.base.domain.{key}", domain_count)
@@ -93,13 +91,13 @@ def period_report(c, dr, k,detail_info=False):
     hour_distrib(c, dr, k)
     nav_path(c, dr, k, env, detail_info=detail_info)
     call_path(c, dr, k, env, detail_info=detail_info)
-
+    query_frequency(c,dr,k)
     city_query(c,dr,k)
 
 def nomi_usage_vids(c,dr,key):
     cq = date_count(c, f"select vehicle_id as ts,count(request_id) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by vehicle_id",dr)
-    # vu = date_count(c, "select vehicle_id as ts ,DATEDIFF(%s,activate_time) as c from es8_delivery where env='{env}' and type=1 and date(activate_time)<=%s",(dr[1],dr[1]))
-    # vd = date_count(c,"select vehicle_id as ts ,date(activate_time) as c from es8_delivery where type=1",())
+    vu = date_count(c, f"select vehicle_id as ts ,DATEDIFF(%s,activate_time) as c from car_delivery where env='{env}' and date(activate_time)<=%s",(dr[1],dr[1]))
+    vd = date_count(c,f"select vehicle_id as ts ,date(activate_time) as c from car_delivery where env='{env}' ",())
 
     dt = datetime.strptime(dr[1], "%Y-%m-%d")
     # 当月最大天数
@@ -118,13 +116,22 @@ def nomi_usage_vids(c,dr,key):
         data.append(l)
     ssdb_save_json('vid.usage.'+key,data)
 
+def query_frequency(c,dr,key):
+    c.execute(f"select query as q,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and length(query)>0 group by query order by c desc limit 200",dr)
+    rs = c.fetchall()
+    o = []
+    for r in rs:
+        o.append({'query':r.get('q'),'count':r.get('c')})
+    
+    ssdb_save_json(f"{env}.query.frequency.{key}",o)
+
 def daily_report(c,dt):
     c.execute("SET time_zone = '+8:00'")
     k = 'd.'+dt.replace("-","")
     dr = (dt,dt)
 
     period_report(c,dr,k,detail_info=True)
-    #retention.daily(datetime.strptime(dt, "%Y-%m-%d"))
+    retention.daily(datetime.strptime(dt, "%Y-%m-%d"))
 
 def weekly_report(c,monday):
     c.execute("SET time_zone = '+8:00'")
@@ -144,7 +151,7 @@ def monthly_report(c, year,month):
     m_key = get_month_key(year,month)
 
     period_report(c,dr,m_key, detail_info=False)
-    #nomi_usage_vids(c,dr,m_key)
+    nomi_usage_vids(c,dr,m_key)
 
     retention.monthly(year,month)
 
@@ -195,10 +202,12 @@ if __name__ == '__main__':
     init()
     db = conn['db']
 
+
     with db.cursor() as c:
-        #prod(c)
-        #monthly_report(c, 2018, 12)
-        today = date.today()
-        yesterday = today - timedelta(days=1)
-        daily_report(c, yesterday.strftime('%Y-%m-%d'))
-        snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
+        prod(c)
+    #    monthly_report(c, 2019, 12)
+        # today = date.today()
+        # yesterday = today - timedelta(days=1)
+         
+        # daily_report(c, yesterday.strftime('%Y-%m-%d'))
+    #     snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
