@@ -108,6 +108,11 @@ def get_month_days(year,month):
     else:
         return range(1,last_day+1)
 
+def get_month_dr():
+    today = datetime.date.today()
+    mon = str(today.month).zfill(2)
+    return f'm.{today.year}{mon}'
+
 def get_month_key(year,month):
     mon = str(month).zfill(2)
     return f'm.{year}{mon}'
@@ -140,7 +145,18 @@ def date_count(c,sql,date_count):
         o[str(r.get('ts'))] = r.get('c')
     return o
 
+def date_count_nv(c,sql,date_count):
+    c.execute(sql,date_count)
+    rs = c.fetchall()
+    l = []
+    for r in rs:
+        l.append({'name':str(r.get('ts')), 'value': r.get('c')})
+    return l
+
 def get_count(c,sql,pp):
     c.execute(sql, pp)
     return c.fetchone().get('c')
 
+def get_data(c,sql):
+    c.execute(sql)
+    return c.fetchone().get('c')

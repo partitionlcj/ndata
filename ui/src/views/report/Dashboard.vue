@@ -50,10 +50,10 @@ export default {
   },
   computed: {
     useNomiHoursKey() {
-      return `total.info.use_nomi_hours.d.${this.today}`;
+      return `ds-mars-prod.total.info.use_nomi_hours.d.${this.today}`;
     },
     useNomiSummaryKey() {
-      return `total.info.use_nomi.d.${this.today}`;
+      return `ds-mars-prod.total.info.use_nomi.d.${this.today}`;
     },
     baseSummaryData() {
       if (this.nomiUseSummary) {

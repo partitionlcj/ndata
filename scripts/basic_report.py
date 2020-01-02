@@ -3,6 +3,7 @@ from navi_funnel import *
 from call_funnel import *
 import retention
 from datetime import datetime, timedelta, date
+import hourly_task
 
 def hot_domains(c,date_range,key):
     domain_count = date_count(c, f"select domain as ts,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by domain order by c desc",date_range)
@@ -182,8 +183,7 @@ def today(c):
     for i in range(0,2):
         monday = today - timedelta(days=(today.weekday() + i*7))
         weekly_report(c,monday)
-    monthly_report(c, 2019, today.month)
-    monthly_report(c, 2019, today.month-1)
+    monthly_report(c, 2020, today.month)
 
     snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
 
@@ -196,18 +196,18 @@ def dev(c):
     # monthly_report(c, 2018, 10)
     # gen_all_monthly_data(c)
     # gen_all_daily_data(c)
-
+    # monthly_report(c, 2019, 12)
+    # today = date.today()
+    # yesterday = today - timedelta(days=1)   
+    # daily_report(c, yesterday.strftime('%Y-%m-%d'))
+    # snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
 
 if __name__ == '__main__':
     init()
     db = conn['db']
 
-
     with db.cursor() as c:
         prod(c)
-    #    monthly_report(c, 2019, 12)
-        # today = date.today()
-        # yesterday = today - timedelta(days=1)
-         
-        # daily_report(c, yesterday.strftime('%Y-%m-%d'))
-    #     snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
+
+    hourly_task.run_task    
+    
