@@ -22,7 +22,7 @@ def gen_domain(c, d, today):
     hour_query[int(i)] = queries[i]
   return hour_query
 
-def gen_daily_data(c,dt):
+def gen_daily_data(c,dt,today):
   queryCount = get_count(c,f"select count(*) as c from debug_query where env='{env}' and date(ts)=%s",dt)
   sessionCount = get_count(c,f"select count(distinct(session_id)) as c from debug_query where env='{env}' and date(ts)=%s",dt)
   onlineSessionCount = sessionCount
@@ -142,7 +142,7 @@ def run_task():
     
     today = date.today()
     dt = today.strftime('%Y-%m-%d')
-    gen_daily_data(c,dt)
+    gen_daily_data(c,dt,today)
 
 if __name__ == '__main__':
   run_task()

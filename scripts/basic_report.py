@@ -209,5 +209,5 @@ if __name__ == '__main__':
     with db.cursor() as c:
         prod(c)
 
-    hourly_task.run_task    
+    hourly_task.run_task()
     
