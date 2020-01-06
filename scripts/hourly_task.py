@@ -76,7 +76,7 @@ def gen_daily_data(c,dt,today):
   
   activeUser['data'] = date_count_nv(c,f"SELECT vehicle_id as ts,count(1) as c from debug_query where env='{env}' and date(ts)=%s group by vehicle_id order by c desc limit 20",dt)
   for i in activeUser['data']:
-    i['attr'] = get_data(c,f"select DATE_FORMAT(activate_time,'%%Y%%m') as c from car_delivery where vehicle_id='{i['name']}'")
+    i['attr'] = get_count(c,f"select DATE_FORMAT(activate_time,'%%Y%%m') as c from car_delivery where vehicle_id=%s",i['name'])
 
   MonthActiveUser = {
         "head": [
