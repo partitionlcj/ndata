@@ -6,7 +6,7 @@ import time
 import boto3
 import botocore
 import wave
-
+from subprocess import call,Popen,PIPE
 
 BUCKET_NAME = 'ais-storage'
 
@@ -85,6 +85,12 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = 'WAKEUP_' + rid
+    p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
+    output, err = p.communicate("")
+    print(output)
+    print(err)
+
+def pcm2wav1(rid):
     with open(fn, 'rb') as pcmfile:
         pcmdata = pcmfile.read()
     with wave.open( fn + '.wav', 'wb') as wavfile:
