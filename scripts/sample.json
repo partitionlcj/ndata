@@ -1,0 +1,79 @@
+{
+  "asrNluRequestHeader": {
+    "isNeedNlu": true,
+    "oneshot": true,
+    "sourceId": 1,
+    "extra": {
+      "bluetoothState": false,
+      "carType": "GUAZI",
+      "bluetoothAddress": "",
+      "userAwaken": true,
+      "appId": "100240130",
+      "naviApp": "gaode",
+      "soundLocation": "front_left",
+      "vehicleStatus": "{\"media\":{\"media\":{\"album\":\"3D大自然睡前曲|枕着宇宙万物入眠 立体声无损享受\",\"artist\":\"喜马音乐小编\",\"id\":\"242721991\",\"name\":\"爱你 是我做过最好的事（水波、鸟鸣、木吉他、钢琴）\",\"sourceType\":5,\"url\":\"http://fdfs.xmcdn.com/group70/M02/44/86/wKgO2F4Wk9mgbK5CABcQE-HjyPA704.mp3\"},\"playStatus\":1},\"navi\":{\"destination\":{\"address\":\"\",\"id\":\"\",\"latitude\":\"0.0\",\"longitude\":\"0.0\",\"name\":\"\"},\"naviStatus\":0}}"
+    },
+    "id": "1888cd3c-4243-b7d4-544c-5bb97a9d5544",
+    "token": "3.0WKaTcjm0BREdaiDT5tpiPOobqMluFJ7O+yNDbhNFGnU\u003d",
+    "useSpeex": true,
+    "vehicleId": "c419901342a9e40ff9811df76c157a70"
+  },
+  "dialogueRequestBody": {
+    "extra": {
+      "bluetoothState": false,
+      "carType": "GUAZI",
+      "bluetoothAddress": "",
+      "userAwaken": true,
+      "naviApp": "gaode",
+      "soundLocation": "front_left",
+      "vehicleStatus": "{\"media\":{\"media\":{\"album\":\"3D大自然睡前曲|枕着宇宙万物入眠 立体声无损享受\",\"artist\":\"喜马音乐小编\",\"id\":\"242721991\",\"name\":\"爱你 是我做过最好的事（水波、鸟鸣、木吉他、钢琴）\",\"sourceType\":5,\"url\":\"http://fdfs.xmcdn.com/group70/M02/44/86/wKgO2F4Wk9mgbK5CABcQE-HjyPA704.mp3\"},\"playStatus\":1},\"navi\":{\"destination\":{\"address\":\"\",\"id\":\"\",\"latitude\":\"0.0\",\"longitude\":\"0.0\",\"name\":\"\"},\"naviStatus\":0}}"
+    },
+    "oneshot": false,
+    "query": "下一首",
+    "reqId": "1888cd3c-4243-b7d4-544c-5bb97a9d5544",
+    "sourceId": 1,
+    "vehicleId": "c419901342a9e40ff9811df76c157a70"
+  },
+  "finalAsrResult": {
+    "offline_result": "",
+    "offline_state": "",
+    "online_result": "下一首",
+    "online_state": "finish",
+    "request_id": "1888cd3c-4243-b7d4-544c-5bb97a9d5544"
+  },
+  "finalResponse": {
+    "awakenWords": [
+      
+    ],
+    "isBackgroundAction": false,
+    "isPush": false,
+    "openAsr": false,
+    "operations": [
+      {
+        "application": "MEDIA",
+        "params": {
+          "offset": "next"
+        },
+        "type": "switch"
+      }
+    ],
+    "query": "下一首",
+    "sessionEnd": true,
+    "sessionId": "6bfbce0f-9c39-4c3b-bba8-2952d7b49ccd",
+    "tts": [
+      {
+        "id": 5016,
+        "content": "这就更换"
+      }
+    ],
+    "view": {
+      "viewText": [
+        {
+          "id": 5016,
+          "content": "已换歌"
+        }
+      ]
+    }
+  },
+  "isUsingCloudResponse": true
+}
