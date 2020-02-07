@@ -170,6 +170,38 @@ public class ReportController {
         return new ResponseEntity<Object>(GsonUtil.instance().toJson(jr), HttpStatus.OK);
     }
 
+    @GetMapping("/vos_debug/getReqInfo")
+    public ResponseEntity<Object> getVosReqInfo(@RequestParam("rid")String rid){
+        Map r = jdbcTemplate.queryForMap("select * from dialogue.vos_request_info where request_id=?", new Object[]{rid});
+        JsonArray jr = new JsonArray();
+        convertStr("request_id",r ,jr);
+        convertStr("vehicle_id",r ,jr);
+        convertStr("env",r ,jr);
+        convert2Json("log_data",r ,jr);
+        convertLong("start_time",r ,jr);
+        convertLong("end_time",r ,jr);
+        convertLong("update_time",r ,jr);
+        return new ResponseEntity<Object>(GsonUtil.instance().toJson(jr), HttpStatus.OK);
+    }
+
+    private void convertLong(String k, Map m, JsonArray jr){
+        Long v = (Long) m.get(k);
+        if( v == null || "null".equals(v))return;
+
+        JsonObject big = new JsonObject();
+        big.addProperty(k,v);
+        jr.add(big);
+    }
+
+    private void convertStr(String k, Map m, JsonArray jr){
+        String v = (String) m.get(k);
+        if( v == null || "null".equals(v))return;
+
+        JsonObject big = new JsonObject();
+        big.addProperty(k,v);
+        jr.add(big);
+    }
+
     private void convert2Json(String k, Map m, JsonArray jr){
         String v = (String) m.get(k);
         if( v == null || "null".equals(v))return;
