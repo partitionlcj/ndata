@@ -80,6 +80,20 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
+  getVosDebugData(begin_date, end_date, requestId, sessionId, query, vid, env, pageIndex, pageSize) {
+    return base('post', COMMON.report, {
+      report_name: "vos_debug_query",
+      pageIndex,
+      pageSize,
+      begin_date,
+      end_date,
+      request_id: `%${requestId}%`,
+      query: `%${query}%`,
+      session_id: `%${sessionId}%`,
+      vid: `%${vid}%`,
+      env: `%${env}%`
+    });
+  },
   getRequestInfo(requestId) {
     return base('get', '/api/debug/output?rid='+requestId)
   },

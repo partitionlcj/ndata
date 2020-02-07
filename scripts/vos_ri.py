@@ -20,10 +20,11 @@ class VosReqInfo:
   operations: str = ''
   start_time: int = -1
   end_time: int = -1
+  duration: int = 0
   update_time: datetime = None
 
   def to_sql_params(self) -> tuple:
-    return (self.request_id,  self.session_id, self.vehicle_id, self.env, self.oneshot, self.car_type, self.query, self.tts, self.view_text, self.use_cloud_response, self.operations, self.start_time, self.end_time, self.update_time)
+    return (self.request_id,  self.session_id, self.vehicle_id, self.env, self.oneshot, self.car_type, self.query, self.tts, self.view_text, self.use_cloud_response, self.operations, self.start_time, self.end_time, self.duration, self.update_time)
 
 def parse(o, vri):
   asrNluRequestHeader = o.get('asrNluRequestHeader')
@@ -94,7 +95,7 @@ def vos_ri():
 
   with db.cursor() as c:
     rids = get_exists_rids(c,ts)
-    c.execute("select * from dlg_test.vos_request_info where `update_time`>=%s and `update_time`<%s",(ts,ts_end))
+    c.execute("select * from dialogue.vos_request_info where `update_time`>=%s and `update_time`<%s order by update_time asc",(ts,ts_end))
     rs = c.fetchall()
     for r in rs:
       rid = r.get('request_id')
@@ -110,10 +111,11 @@ def vos_ri():
         vri.env = r.get("env")
         vri.start_time = r.get("start_time")
         vri.end_time = r.get("end_time")
+        vri.duration = vri.end_time - vri.start_time
         vri.update_time = r.get("update_time") / 1000
         parse(o,vri)
         print(vri)
-        c.execute("INSERT INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, `update_time`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s))",vri.to_sql_params() )
+        c.execute("INSERT INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s))",vri.to_sql_params() )
   db.commit()
 
 

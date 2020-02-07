@@ -25,6 +25,11 @@ const REPORT = {
     to: '/debug',
     icon: 'md-grid',
     name: 'face-data'
+  },{
+    label: 'VosDebug',
+    to: '/vos_debug',
+    icon: 'md-grid',
+    name: 'face-data'
   }, {
     label: '单日报表',
     to: '/report/daily',

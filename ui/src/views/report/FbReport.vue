@@ -26,7 +26,6 @@ import VidUsageReport from './report/VidUsageReport';
 import CityReport from './report/CityReport';
 import RetentionReport from './report/RetentionReport';
 import DailyActiveNomi from './report/DailyActiveNomi';
-import VidDataview from './report/VidDataview';
 import MostUsedQuery from './report/MostUsedQuery';
 import QueryInterregional from './report/QueryInterregional';
 
@@ -54,7 +53,6 @@ export default {
     CityReport,
     RetentionReport,
     DailyActiveNomi,
-    VidDataview,
     MostUsedQuery,
     QueryInterregional
   },
@@ -143,11 +141,8 @@ export default {
           label: '日活跃情况',
           key: 'active_nomi_daily',
           component: 'DailyActiveNomi'
-        }, {
-          label: 'vid相关数据',
-          key: 'vehicle.driving',
-          component: 'VidDataview'
-        })
+        }
+        )
       }
       return tabs
     },

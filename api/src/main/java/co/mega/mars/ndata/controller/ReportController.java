@@ -170,7 +170,7 @@ public class ReportController {
         return new ResponseEntity<Object>(GsonUtil.instance().toJson(jr), HttpStatus.OK);
     }
 
-    @GetMapping("/vos_debug/getReqInfo")
+    @GetMapping("/debug/getVosReqInfo")
     public ResponseEntity<Object> getVosReqInfo(@RequestParam("rid")String rid){
         Map r = jdbcTemplate.queryForMap("select * from dialogue.vos_request_info where request_id=?", new Object[]{rid});
         JsonArray jr = new JsonArray();
