@@ -24,23 +24,10 @@ public class VehicleLogService {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-    @Autowired
-    S3Service s3Service;
 
     public List<VehLog> getHisLogs(String vid){
         List<VehLog> result = jdbcTemplate.query("select * from vehicle_log where vehicle_id=?", new Object[]{vid}, rowMapper);
         return result;
-    }
-
-    public void syncLogFiles() {
-        List<VehLog> result = jdbcTemplate.query("select * from vehicle_log where file_sync = 0", rowMapper);
-        for( VehLog l : result){
-            List<String> files = s3Service.syncFolder("/");
-            if( files != null){
-                // TODO
-                jdbcTemplate.update("update vehicle_log set file_sync = 0, log_files where id=?", new Object[]{l.id});
-            }
-        }
     }
 
     static class VehLog{

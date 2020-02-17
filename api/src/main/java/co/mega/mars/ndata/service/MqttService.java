@@ -17,17 +17,15 @@ public class MqttService {
 
     @Value("${mqtt.url}")
     String mqttURL = "ssl://xmars-test.x-tetris.com:20191";
-    @Value("${mqtt.topic}")
-    String topic = "d9b46de6cb428458cf9bb4a49d99d319";
 
-    public void sendUploadLogMsg(long startTime, int hourCount) throws Exception{
+    public void sendUploadLogMsg(String vid, long startTime, int hourCount) throws Exception{
         MQTT mqtt = new MQTT();
         mqtt.setHost(mqttURL);
         BlockingConnection connection = mqtt.blockingConnection();
         connection.connect();
 
 
-        Topic[] topics = {new Topic(topic, QoS.AT_LEAST_ONCE)};
+        Topic[] topics = {new Topic(vid, QoS.AT_LEAST_ONCE)};
         byte[] qoses = connection.subscribe(topics);
 
         Gson gson = new Gson();
@@ -42,7 +40,7 @@ public class MqttService {
         notificationMessage.type = 0;
         notificationMessage.message = gson.toJson(messageContent);
         String pushMessage = gson.toJson(notificationMessage);
-        connection.publish("d9b46de6cb428458cf9bb4a49d99d319", pushMessage.getBytes(), QoS.AT_LEAST_ONCE, false);
+        connection.publish(vid, pushMessage.getBytes(), QoS.AT_LEAST_ONCE, false);
 
         Message message = connection.receive();
         System.out.println(message.getTopic());

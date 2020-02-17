@@ -28,8 +28,13 @@ const REPORT = {
   },{
     label: 'VosDebug',
     to: '/vos_debug',
-    icon: 'md-grid',
+    icon: 'md-bug',
     name: 'face-data'
+  },{
+    label: 'VehLog',
+    to: '/veh_log',
+    icon: 'md-cloud-download',
+    name: 'veh_log'
   }, {
     label: '单日报表',
     to: '/report/daily',

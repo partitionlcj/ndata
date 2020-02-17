@@ -20,6 +20,8 @@ const FbQueryDetailDebug = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbQueryDetailDebug');
 const FbVosDebug = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbVosDebug');
+const FbVehLog = () =>
+  import( /* webpackChunkName: "report" */ './views/report/FbVehLog');
 const FbReport = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbReport');
 const FbBadcase = () =>
@@ -122,6 +124,20 @@ const routes = [{
       }],
     },
     component: FbVosDebug
+  }]
+}, {
+  path: '/veh_log',
+  component: Main,
+  children: [{
+    path: '',
+    name: 'veh_log',
+    meta: {
+      bread: [{
+        label: 'veh_log',
+        to: '/veh_log'
+      }],
+    },
+    component: FbVehLog
   }]
 },{
   path: '/fact_data',

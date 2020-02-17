@@ -54,4 +54,9 @@ security:
 
 mqtt:
   url: ssl://xmars-test.x-tetris.com:20191
-  topic: d9b46de6cb428458cf9bb4a49d99d319
+
+veh:
+  log:
+    url:
+      prefix: http://marsops.i-tetris.com:8888/veh_log/
+    path: /Users/zhouji/codes/ndata/api/src/test/log_data

@@ -97,6 +97,16 @@ export default {
   getRequestInfo(requestId) {
     return base('get', '/api/debug/output?rid='+requestId)
   },
+  searchVehLog(vid) {
+    return base('get', '/api/vehlog/searchLog?vid='+vid)
+  },
+  requestVehLog(vid,startTs,hourCount){
+    return base('post','/api/vehlog/requestLog',{
+      vid,
+      startTs,
+      hourCount
+    })
+  },
   readSsdb(key, page, pageSize) {
     return base('post', COMMON.readSsdb, {
       key,
