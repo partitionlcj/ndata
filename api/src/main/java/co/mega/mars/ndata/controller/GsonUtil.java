@@ -17,6 +17,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class GsonUtil {
@@ -212,5 +213,11 @@ public class GsonUtil {
         JsonArray array = new JsonArray(list.size());
         list.forEach(v -> array.add(v));
         return array;
+    }
+
+    public static void main(String[] args) {
+        Date dt = new Date();
+        dt.setTime(1579514677000l);
+        System.out.println(dt);
     }
 }

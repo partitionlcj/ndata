@@ -43,11 +43,19 @@ logging:
   level:
     org.springframework.web: INFO
     org.springframework.security: INFO
-    co.mega: DEBUG
-  file: app.log
+    co.mega: INFO
+  file: logs/app.log
 
 security:
   jwt:
     token:
       secret-key: MFivmer9Xj4z84z24Ds20f
       expire-length: 604800000
+mqtt:
+  url: ssl://xmars-test.x-tetris.com:20191
+
+veh:
+  log:
+    url:
+      prefix: /logs/
+    path: /var/www/html/ndata/logs

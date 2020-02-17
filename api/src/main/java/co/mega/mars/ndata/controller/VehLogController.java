@@ -32,6 +32,22 @@ public class VehLogController {
     @Value("${veh.log.url.prefix}")
     String logFilePrefix;
 
+    @GetMapping("/vehlog/vids")
+    public ResponseEntity<Object> getVidList(){
+        Set<String> vids = new HashSet<>();
+        File root = new File(vehLogPath);
+        for(File datePath : root.listFiles()) {
+            if (!datePath.isDirectory()) continue;
+            log.info("dataPath {}", datePath);
+            for (File vidPath : datePath.listFiles()) {
+                if (vidPath.isDirectory() && vidPath.getName().length() == 32) {
+                    vids.add(vidPath.getName());
+                }
+            }
+        }
+        return new ResponseEntity<Object>(RestResult.getSuccessResult(vids), HttpStatus.OK);
+    }
+
     public List<VehLog> searchLogs(String vid){
         List<VehLog> logs = new ArrayList<>();
 
@@ -47,7 +63,9 @@ public class VehLogController {
                     for(File logFile : p.listFiles()){
                         String n = logFile.getName();
                         if( n.startsWith("."))continue;
-                        LogFile l = new LogFile(n,logFilePrefix + n);
+                        LogFile l = new LogFile(n,logFilePrefix + datePath.getName() + "/" + vidPath.getName() + "/0/" + n);
+                        log.info("log file : {}", n);
+                        if( n.length() < 18)continue;
                         String createdAt = n.substring(8,18);
                         List<LogFile> ls = logByDate.get(createdAt);
                         if( ls == null){
@@ -73,20 +91,10 @@ public class VehLogController {
 
     @GetMapping("/vehlog/searchLog")
     public ResponseEntity<Object> searchLog(String vid){
-//        VehLog vl = new VehLog();
-//        vl.createdAt = "20191213";
-//        vl.uploadedAt = "20191215";
-//        List<LogFile> logs = new ArrayList<>();
-//        for(int i = 0; i < 20; i++){
-//            logs.add(LogFile.builder().name("aaa").link("http:://vos-sdk.2020-01-20-18_10.log.gz").build());
-//        }
-//        vl.files = logs;
-//        List<VehLog> vlogs = new ArrayList<>();
-//        vlogs.add(vl);
         return new ResponseEntity<Object>(RestResult.getSuccessResult(searchLogs(vid)), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/vehlog/requestLog")
     public ResponseEntity<Object> requestLog(@RequestBody RequestLogForm form){
         log.info("requst log : {}",form);
         try {

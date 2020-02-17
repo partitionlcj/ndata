@@ -40,21 +40,25 @@ export default {
       hourCount: 0,
       vid:'',
       searchVid:'',
-      vids:['d9b46de6cb428458cf9bb4a49d99d319'],
+      vids:[],
       loading: false,
       columns: [{
-        title: '日志生成时间',
+        title: '日志回传时间',
         key: 'uploadedAt'
       },
       {
-        title: '日志回传时间',
+        title: '日志生成时间',
         key: 'createdAt'
       },
       {
         title: '日志文件',
         key: 'files',
         render: (h, params) => {
-          return h('ul', params.row.files.map(f => h('li', [h('a',{props:{"href":f.link}},f.name)])));
+          return h('ul', params.row.files.map(f => h('li', [h('a',{on: {
+                'click': ()=>{
+                    this.handleLink(f.link)
+                }
+          }},f.name)])));
         }
       }
       ],
@@ -62,7 +66,14 @@ export default {
       ]
     }
   },
+  mounted () {
+    this.getVids()
+  },
   methods: {
+    async getVids(){
+      let response = await api.getVehVids()
+      this.vids = response.data
+    },
     async requestLog () {
       let response
       this.loading = true
@@ -86,6 +97,9 @@ export default {
     },
     timeChange (time) {
       this.startTime = time
+    },
+    handleLink (link) {
+      window.open(link)
     }
   }
 }

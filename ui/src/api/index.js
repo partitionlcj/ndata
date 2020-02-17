@@ -107,6 +107,9 @@ export default {
       hourCount
     })
   },
+  getVehVids(){
+    return base('get','/api/vehlog/vids')
+  },
   readSsdb(key, page, pageSize) {
     return base('post', COMMON.readSsdb, {
       key,
