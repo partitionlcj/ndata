@@ -2,9 +2,7 @@ import json
 import time
 import pymysql
 from datetime import datetime
-from dataclasses import dataclass
 
-@dataclass
 class VosReqInfo:
   '''Class for keeping track of an item in inventory.'''
   request_id: str = ''
@@ -87,19 +85,18 @@ def vos_ri():
   total_query = 0
   insert_query = 0
 
-  back_time = 31*24*60*60*1000
+  back_time = 10*24*60*60*1000
 
   ts_end = int(time.time()*1000)
   ts = ts_end - back_time
-  
 
   with db.cursor() as c:
     rids = get_exists_rids(c,ts)
     c.execute("select * from dialogue.vos_request_info where `update_time`>=%s and `update_time`<%s order by update_time asc",(ts,ts_end))
     rs = c.fetchall()
+    print(f"fetch {len(rs)} vod_request_info records")
     for r in rs:
       rid = r.get('request_id')
-      print(rid)
       if rid not in rids:
         data = r.get("log_data")
         try:
@@ -114,7 +111,7 @@ def vos_ri():
         vri.duration = vri.end_time - vri.start_time
         vri.update_time = r.get("update_time") / 1000
         parse(o,vri)
-        print(vri)
+        print(rid)
         c.execute("INSERT INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s))",vri.to_sql_params() )
   db.commit()
 
