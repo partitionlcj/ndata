@@ -19,11 +19,8 @@
       <Col span="6" class="margin-bottom-10">
       <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
       </Col>
-      <template v-if="reportName=='fact-data'">
-        <Col span="4" class="margin-bottom-10">
+      <Col span="4" class="margin-bottom-10">
         <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
-        </Col>
-      </template>
       </Col>
     </Row>
     <Table :columns="columns" :data="data" :loading="loading" :row-class-name="currentViewRowCls" class="detail-table"></Table>
