@@ -13,6 +13,10 @@
         placeholder="Vehicle ID"
         style="width:200px">
     </AutoComplete>
+    <Input v-model="appId" placeholder="appId" style="width:100px"></Input>
+    <Select v-model="env" placeholder="env" style="width:100px">
+      <Option v-for="item in envs" :key="item" :value="item">{{item}}</Option>
+    </Select>
     <Button type="primary" @click="requestLog()">发送日志回传请求</Button>
     </div>
     <br>
@@ -38,6 +42,9 @@ export default {
       startDate: '',
       startTime: '',
       hourCount: 0,
+      env:'',
+      envs:['test','stg','prod'],
+      appId:  '',
       vid:'',
       searchVid:'',
       vids:[],
@@ -77,7 +84,7 @@ export default {
     async requestLog () {
       let response
       this.loading = true
-      response = await api.requestVehLog(this.vid, this.startDate + ' ' + this.startTime, this.hourCount)
+      response = await api.requestVehLog(this.vid, this.startDate + ' ' + this.startTime, this.hourCount, this.appId, this.env)
       this.loading = false;
       if( response.state == 'success' ){
         this.$Message.success('回传日志请求推送成功！');

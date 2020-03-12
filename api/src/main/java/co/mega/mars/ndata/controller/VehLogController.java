@@ -101,7 +101,8 @@ public class VehLogController {
             SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             Date date = parser.parse(form.startTs);
 
-            mqttService.sendUploadLogMsg(form.vid, date.getTime(), form.hourCount);
+            mqttService.sendUploadLogMsg(form.env, form.appId, form.vid, date.getTime(), form.hourCount);
+
         }catch (Exception ex){
             log.error("Failed to request vehicle log for {}", form, ex);
             return new ResponseEntity<Object>(RestResult.getFailResult(ex.getMessage(),null), HttpStatus.OK);
@@ -126,5 +127,7 @@ public class VehLogController {
         public String vid;
         public String startTs;
         public int hourCount;
+        public String appId;
+        public String env;
     }
 }

@@ -100,11 +100,13 @@ export default {
   searchVehLog(vid) {
     return base('get', '/api/vehlog/searchLog?vid='+vid)
   },
-  requestVehLog(vid,startTs,hourCount){
+  requestVehLog(vid,startTs,hourCount, appId, env){
     return base('post','/api/vehlog/requestLog',{
       vid,
       startTs,
-      hourCount
+      hourCount,
+      appId,
+      env
     })
   },
   getVehVids(){

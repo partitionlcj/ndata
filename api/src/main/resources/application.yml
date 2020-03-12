@@ -52,9 +52,6 @@ security:
       secret-key: MFivmer9Xj4z84z24Ds20f
       expire-length: 604800000
 
-mqtt:
-  url: ssl://xmars-test.x-tetris.com:20191
-
 veh:
   log:
     url:
