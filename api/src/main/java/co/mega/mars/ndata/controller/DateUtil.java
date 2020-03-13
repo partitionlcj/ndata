@@ -31,7 +31,7 @@ public class DateUtil {
 
     public static String formatDate(long millisecond) {
         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
-        c.setTimeInMillis(millisecond - 13*3600000);
+        c.setTimeInMillis(millisecond - 12*3600000);
         StringBuilder sb = new StringBuilder();
 
         sb.append(c.get(Calendar.YEAR)).append("-").append(c.get(Calendar.MONTH)+1).append("-").append(c.get(Calendar.DAY_OF_MONTH))
