@@ -48,45 +48,55 @@ public class VehLogController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(vids), HttpStatus.OK);
     }
 
-    public List<VehLog> searchLogs(String vid){
+    public List<VehLog> searchLogs(String vid,String type){
         List<VehLog> logs = new ArrayList<>();
 
-        File root = new File(vehLogPath);
-        for(File datePath : root.listFiles()){
-            if( ! datePath.isDirectory())continue;
-            log.info("dataPath {}",datePath);
-            for(File vidPath : datePath.listFiles()){
-                if( vidPath.isDirectory() && vid.equalsIgnoreCase(vidPath.getName())){
-                    File p = new File(vidPath.getAbsolutePath()+"/0/");
+        File root = new File(vehLogPath+"/"+type);
 
-                    Map<String,List<LogFile>> logByDate = new HashMap<>();
-                    for(File logFile : p.listFiles()){
-                        String n = logFile.getName();
-                        if( n.startsWith("."))continue;
-                        LogFile l = new LogFile(n,logFilePrefix + datePath.getName() + "/" + vidPath.getName() + "/0/" + n);
-                        log.info("log file : {}", n);
-                        if( n.length() < 18)continue;
-                        String createdAt = n.substring(8,18);
-                        List<LogFile> ls = logByDate.get(createdAt);
-                        if( ls == null){
-                            ls = new ArrayList<>();
-                            logByDate.put(createdAt, ls);
+        for(File envPath: root.listFiles()) {
+            for (File datePath : envPath.listFiles()) {
+                if (!datePath.isDirectory()) continue;
+                log.info("dataPath {}", datePath);
+                for (File vidPath : datePath.listFiles()) {
+                    if (vidPath.isDirectory() && vid.equalsIgnoreCase(vidPath.getName())) {
+                        File p = new File(vidPath.getAbsolutePath() + "/0/");
+
+                        Map<String, List<LogFile>> logByDate = new HashMap<>();
+                        for (File logFile : p.listFiles()) {
+                            String n = logFile.getName();
+                            if (n.startsWith(".")) continue;
+                            LogFile l = new LogFile(n, logFilePrefix + type + "/" +envPath.getName() +"/" + datePath.getName() + "/" + vidPath.getName() + "/0/" + n);
+                            log.info("log file : {}", n);
+                            if (n.length() < 18) continue;
+                            String createdAt = n.substring(8, 18);
+                            List<LogFile> ls = logByDate.get(createdAt);
+                            if (ls == null) {
+                                ls = new ArrayList<>();
+                                logByDate.put(createdAt, ls);
+                            }
+                            ls.add(l);
                         }
-                        ls.add(l);
-                    }
 
-                    for(Map.Entry<String,List<LogFile>> ett : logByDate.entrySet()){
-                        VehLog log = new VehLog();
-                        log.uploadedAt = datePath.getName();
-                        log.createdAt = ett.getKey();
-                        log.files = ett.getValue();
+                        for (Map.Entry<String, List<LogFile>> ett : logByDate.entrySet()) {
+                            VehLog log = new VehLog();
+                            log.uploadedAt = datePath.getName();
+                            log.createdAt = ett.getKey();
+                            log.files = ett.getValue();
 
-                        logs.add(log);
+                            logs.add(log);
+                        }
                     }
                 }
             }
         }
         return logs;
+    }
+
+    public List<VehLog> searchLogs(String vid){
+        List<VehLog> r = searchLogs(vid, "aws");
+        List<VehLog> r1 = searchLogs(vid,"gn");
+        r.addAll(r1);
+        return r;
     }
 
     @GetMapping("/vehlog/searchLog")
