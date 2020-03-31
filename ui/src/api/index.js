@@ -97,8 +97,8 @@ export default {
   getRequestInfo(requestId) {
     return base('get', '/api/debug/output?rid='+requestId)
   },
-  searchVehLog(vid) {
-    return base('get', '/api/vehlog/searchLog?vid='+vid)
+  searchVehLog(vid,appId) {
+    return base('get', '/api/vehlog/searchLog?vid='+vid+"&appId="+appId)
   },
   requestVehLog(vid,startTs,hourCount, appId, env){
     return base('post','/api/vehlog/requestLog',{

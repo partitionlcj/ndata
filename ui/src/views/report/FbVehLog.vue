@@ -25,8 +25,9 @@
         v-model="searchVid"
         :data="vids"
         placeholder="Vehicle ID"
-        style="width:200px">
+        style="width:300px">
     </AutoComplete>
+    <Input v-model="appId" placeholder="appId" style="width:100px"></Input>
     <Button type="primary" @click="searchLog()">查看日志</Button>
         <Table :columns="columns" :data="logs" :loading="loading" class="detail-table"></Table>
     </div>
@@ -95,7 +96,7 @@ export default {
 
     },
     async searchLog () {
-      let response = await api.searchVehLog(this.searchVid)
+      let response = await api.searchVehLog(this.searchVid, this.appId)
       this.logs = response.data
       console.log(response)
     },

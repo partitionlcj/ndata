@@ -48,13 +48,17 @@ public class VehLogController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(vids), HttpStatus.OK);
     }
 
-    public List<VehLog> searchLogs(String vid,String type){
+    public List<VehLog> searchLogs(String vid, String appId, String type){
         List<VehLog> logs = new ArrayList<>();
 
         File root = new File(vehLogPath+"/"+type);
 
         for(File envPath: root.listFiles()) {
-            for (File datePath : envPath.listFiles()) {
+            String appDir = appId.substring(1,5);
+            File appIdPath = new File(envPath.getAbsolutePath() + "/" +appDir);
+            log.info("appIdPath {}",appIdPath.getAbsolutePath());
+            if( ! appIdPath.exists()) break;
+            for (File datePath : appIdPath.listFiles()) {
                 if (!datePath.isDirectory()) continue;
                 log.info("dataPath {}", datePath);
                 for (File vidPath : datePath.listFiles()) {
@@ -65,7 +69,7 @@ public class VehLogController {
                         for (File logFile : p.listFiles()) {
                             String n = logFile.getName();
                             if (n.startsWith(".")) continue;
-                            LogFile l = new LogFile(n, logFilePrefix + type + "/" +envPath.getName() +"/" + datePath.getName() + "/" + vidPath.getName() + "/0/" + n);
+                            LogFile l = new LogFile(n, logFilePrefix + type + "/" +envPath.getName() +"/" + appDir + "/" + datePath.getName() + "/" + vidPath.getName() + "/0/" + n);
                             log.info("log file : {}", n);
                             if (n.length() < 18) continue;
                             String createdAt = n.substring(8, 18);
@@ -92,16 +96,12 @@ public class VehLogController {
         return logs;
     }
 
-    public List<VehLog> searchLogs(String vid){
-        List<VehLog> r = searchLogs(vid, "aws");
-        List<VehLog> r1 = searchLogs(vid,"gn");
-        r.addAll(r1);
-        return r;
-    }
-
     @GetMapping("/vehlog/searchLog")
-    public ResponseEntity<Object> searchLog(String vid){
-        return new ResponseEntity<Object>(RestResult.getSuccessResult(searchLogs(vid)), HttpStatus.OK);
+    public ResponseEntity<Object> searchLog(String vid, String appId){
+        List<VehLog> r = searchLogs(vid, appId, "aws");
+        List<VehLog> r1 = searchLogs(vid,appId, "gn");
+        r.addAll(r1);
+        return new ResponseEntity<Object>(RestResult.getSuccessResult(r), HttpStatus.OK);
     }
 
     @PostMapping("/vehlog/requestLog")
