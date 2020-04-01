@@ -110,6 +110,10 @@ class HuDataTracking(object):
         self.vehicle_id = ri['vehicle_id']
         self.env = ri['env']
         self.query = ri['query']
+
+        if self.query == None:
+            self.query = 'N/A'
+
         self.output = ri['output']
         self.client_version = ri['client_version']
         if self.client_version != None:
@@ -269,8 +273,8 @@ def audio_dump(rid, ts, provider='aws'):
         print('hw')
         s3 = boto3.resource(
                     's3',
-                    aws_access_key_id='NQBXVLYGNC5ZAL6WLHQV',
-                    aws_secret_access_key='fD0f9rCHd3fAYl0bewgoZI7VyxO4hp1e4BasEoJW',
+                    aws_access_key_id='EPYG0BBE0O37MORZ8WGE',
+                    aws_secret_access_key='BFoQLLDiBELjZMndiRLj8ZprF4XoKDMBHqYZO70R',
                     endpoint_url='http://obs.cn-south-1.myhuaweicloud.com/'
                   )
     else:
