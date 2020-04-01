@@ -139,6 +139,31 @@ export default {
           minWidth: 120
         }
       )
+    
+      columns.push({
+        title: '音频',
+        width: 70,
+        render: (h, params) => {
+          return h('AisAudio', {
+            props: {
+              url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
+              size: 14
+            }
+          })
+        }
+      })
+      columns.push({
+        title: '唤醒',
+        width: 90,
+        render: (h, params) => {
+          return h('AisAudio', {
+            props: {
+              url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
+              size: 14
+            }
+          })
+        }
+      })
       columns.push({
         title: '更新时间',
         key: 'updated_at',
