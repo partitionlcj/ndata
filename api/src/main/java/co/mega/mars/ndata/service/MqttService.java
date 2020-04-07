@@ -81,6 +81,8 @@ public class MqttService {
         String rt = new String(message.getPayload(), "UTF-8");
         log.info("notificationMessage {}",rt);
         message.ack();
+
+        connection.disconnect();
     }
 
     static class MqttConfig{
