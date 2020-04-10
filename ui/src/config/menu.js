@@ -31,6 +31,11 @@ const REPORT = {
     icon: 'md-bug',
     name: 'face-data'
   },{
+    label: 'VosEvent',
+    to: '/vos_event',
+    icon: 'md-list',
+    name: 'face-data'
+  },{
     label: 'VehLog',
     to: '/veh_log',
     icon: 'md-cloud-download',

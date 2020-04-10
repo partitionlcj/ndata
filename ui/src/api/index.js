@@ -94,6 +94,19 @@ export default {
       env: `%${env}%`
     });
   },
+  getVosEventData(begin_date, end_date, app_id, event_type, vid, env, pageIndex, pageSize) {
+    return base('post', COMMON.report, {
+      report_name: "vos_event_query",
+      pageIndex,
+      pageSize,
+      begin_date,
+      end_date,
+      app_id: `%${app_id}%`,
+      event_type: `%${event_type}%`,
+      vehicle_id: `%${vid}%`,
+      env: `%${env}%`
+    });
+  },
   getRequestInfo(requestId) {
     return base('get', '/api/debug/output?rid='+requestId)
   },
