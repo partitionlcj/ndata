@@ -15,18 +15,13 @@ const REPORT = {
     to: '/report/intent_report',
     icon: 'ios-pie-outline',
     name: 'intent-report'
-  }, {
-    label: '实车用户数据',
-    to: '/fact_data',
-    icon: 'md-grid',
-    name: 'face-data'
   },{
-    label: 'Debug',
+    label: 'Request Info',
     to: '/debug',
     icon: 'md-grid',
     name: 'face-data'
   },{
-    label: 'VosDebug',
+    label: 'Local Request Info',
     to: '/vos_debug',
     icon: 'md-bug',
     name: 'face-data'
