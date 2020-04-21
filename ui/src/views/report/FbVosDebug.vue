@@ -154,10 +154,6 @@ export default {
           key: 'intent',
           minWidth: 100
         }, {
-          title: 'operation',
-          key: 'operation',
-          minWidth: 100
-        }, {
           title: 'env',
           key: 'env',
           minWidth: 80
