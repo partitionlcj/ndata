@@ -105,30 +105,6 @@ public class GsonUtil {
         }
     }
 
-    public static List<JsonElement> getJsonElements(JsonArray array) {
-        List<JsonElement> elementList = new ArrayList<>();
-        if (array == null || array.size() == 0)
-            return elementList;
-
-        array.forEach(v -> elementList.add(v));
-        return elementList;
-    }
-
-    public static void putString(JsonObject object, String key, String value) {
-        object.addProperty(key, value == null ? "" : value);
-    }
-
-    public static void putInt(JsonObject object, String key, Integer value) {
-        object.addProperty(key, value == null ? 0 : value);
-    }
-
-    public static void putTimestamp(JsonObject object, String key, Timestamp timestamp) {
-        if (timestamp == null)
-            putString(object, key, "");
-        else
-            putString(object, key, DateUtil.formatDate(timestamp.getTime()));
-    }
-
     /**
      * 浅拷贝
      */
@@ -165,7 +141,7 @@ public class GsonUtil {
             }
             else if (clazz == Timestamp.class) {
                 Timestamp timestamp = rs.getTimestamp(columnName);
-                rst.addProperty(columnName, timestamp == null ? "" : DateUtil.formatDate(timestamp.getTime()));
+                rst.addProperty(columnName, timestamp == null ? null : timestamp.getTime());
             }
             else {
                 throw new IllegalArgumentException("column type(" +clazz.toString() + ") can not parse");

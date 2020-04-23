@@ -294,7 +294,7 @@ export default {
         domain: item[6],
         intent: item[7],
         operation: item[8],
-        updated_at: item[1],
+        updated_at: new Date(item[1]).toLocaleString("zh-CN"),
         tts: item[2],
         request_id: item[9],
         env: item[10],
