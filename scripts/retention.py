@@ -4,32 +4,32 @@ from datetime import date,datetime,timedelta
 
 def get_dau_vids(dt):
     d = dt.strftime('%Y%m%d')
-    k = f"{env}.base.active_vids.d.{d}"
+    k = f'{env}.base.active_vids.d.' + d
     return get_set_from_ssdb(k)
 
 def get_dnu_vids(dt):
     d = dt.strftime('%Y%m%d')
-    k = f"{env}.base.new_vids.d.{d}"
+    k = 'base.new_vids.d.' + d
     return get_set_from_ssdb(k)
 
 def get_wau_vids(monday):
-    k = f"{env}.base.active_vids.{get_week_key(monday)}"
+    k = f'base.active_vids.' + get_week_key(monday)
     return get_set_from_ssdb(k)
 
 def get_wnu_vids(monday):
-    k = f"{env}.base.new_vids.{get_week_key(monday)}"
+    k = f'base.new_vids.' + get_week_key(monday)
     return get_set_from_ssdb(k)
 
 def get_wau_vids(monday):
-    k = f"{env}.base.active_vids.{get_week_key(monday)}"
+    k = f'base.active_vids.' + get_week_key(monday)
     return get_set_from_ssdb(k)
 
 def get_mnu_vids(year,month):
-    k = f"{env}.base.new_vids.{get_month_key(year, month)}"
+    k = f'base.new_vids.' + get_month_key(year, month)
     return get_set_from_ssdb(k)
 
 def get_mau_vids(year,month):
-    k = f"{env}.base.active_vids.{get_month_key(year,month)}"
+    k = f'base.active_vids.'+get_month_key(year,month)
     return get_set_from_ssdb(k)
 
 def retention_daily(dt, dau, days_before):
@@ -63,7 +63,7 @@ def daily(dt):
             retentions_daily["当日新用户激活率"]=retention_daily(dt, dau, i)
         else:
             retentions_daily[str(i) + "天前用户留存"] = retention_daily(dt, dau, i)
-    ssdb_save_json(f"{env}.retention.d."+dt.strftime('%Y%m%d'),retentions_daily)
+    ssdb_save('retention.d.'+dt.strftime('%Y%m%d'),retentions_daily)
 
 def weekly(monday):
     wau = get_wau_vids(monday)
@@ -74,7 +74,7 @@ def weekly(monday):
             k = "本周新用户激活率"
         retentions_weekly[k]=retention_weekly(monday,wau,i)
     print(retentions_weekly)
-    ssdb_save_json(f"{env}.retention." + get_week_key(monday),retentions_weekly)
+    ssdb_save('retention.' + get_week_key(monday),retentions_weekly)
 
 def monthly(year,month):
     mau = get_mau_vids(year,month)
@@ -84,7 +84,7 @@ def monthly(year,month):
         if i == 0:
             k = "本月新用户激活率"
         r[k] = retention_monthly(mau, year,month, i)
-    ssdb_save_json(f"{env}.retention." + get_month_key(year,month), r)
+    ssdb_save('retention.' + get_month_key(year,month), r)
 
     detail_retention(year, month)
 
@@ -116,9 +116,6 @@ def detail_retention(year,month):
 
     p2 = get_month_before(year, month, 2)
     mnu_2 = get_mnu_vids(p2[0], p2[1])
-
-    if mnu_1 == None or mnu_2 == None:
-        return
 
     dr = get_month_date_range(p1[0], p1[1])
     mnu_old = get_new_vids_before(dr[0])
@@ -153,7 +150,7 @@ def detail_retention(year,month):
 
         rr[dt.strftime('%Y-%m-%d')] = [r0,r1,r2,ro]
     m_key = get_month_key(year,month)
-    ssdb_save_json(f"{env}.retention.detail."+m_key, rr)
+    ssdb_save('retention.detail.'+m_key, rr)
 
 def gen_all_weekly_retention():
     dt = datetime.now()

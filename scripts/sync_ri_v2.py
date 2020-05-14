@@ -131,7 +131,7 @@ class HuDataTracking(object):
 
         input = json.loads(ri['input'])
         self.query_inhouse = input.get('queryInhouse',None)
-        self.use_inhouse = input.get('useInhouse', None)
+        self.oneshot = input.get('oneshot', None)
 
         extra = input.get('extra',{})
         self.voice_id = int(extra.get('voiceId',0))
@@ -192,13 +192,13 @@ class HuDataTracking(object):
     def save_db(self):
         with db.cursor() as c:
             c.execute(
-                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,address,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, use_inhouse, voice_id, output) "
+                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,address,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)",
                 (self.request_id, self.vehicle_id, self.session_id, self.user_id, self.query, self.nlu_type,
                  self.final_tts, self.final_view_text, self.ts, self.domain, self.intents, self.multi_round, self.env,
                  self.city, self.address, self.request_trigger_by, self.use_response, self.awaken_type,
                  self.sound_location, self.state, self.operations, self.catemr, self.cst_id, self.client_version,
-                 self.sd_ver, self.query_inhouse, self.use_inhouse, self.voice_id, self.output))
+                 self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output))
             db.commit()
 
 def process_vid_file(fn):

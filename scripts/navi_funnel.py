@@ -29,6 +29,7 @@ def nav_path(c, date_range, key, env,detail_info=False):
 
                 nav_intent_sessions.add(sessionId)
                 break
+
         state = r.get('state')
         if state != None and state >= 32 and state <= 36:
             nav_state_resp_sessions.add(sessionId)
@@ -43,7 +44,7 @@ def nav_path(c, date_range, key, env,detail_info=False):
                 if o in valid_nav_operations:
                     nav_operation_sessions.add(sessionId)
                     break
-    
+
     calc_by_intent(key,nav_intent_sessions,nav_state_resp_sessions,nav_state_poi_sessions,nav_operation_sessions,detail_info,env)
     for i in entry_intent_sessions:
         calc_by_intent(key+'.'+i, entry_intent_sessions[i], nav_state_resp_sessions, nav_state_poi_sessions, nav_operation_sessions,
@@ -79,6 +80,7 @@ def calc_by_intent(key,entry_intent_sessions,nav_state_resp_sessions,nav_state_p
 def monthly_result():
     nav_path('2018-08-01', '2018-08-31', 'navi.step_conv.result.monthly.201908')
     nav_path('2018-07-01', '2018-07-31', 'navi.step_conv.result.monthly.201907')
+
 
 def daily_result():
     dt = '2018-09-17'

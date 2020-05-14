@@ -3,26 +3,27 @@ from navi_funnel import *
 from call_funnel import *
 import retention
 from datetime import datetime, timedelta, date
-import hourly_task
+
+env='ds-mars-prod'
 
 def hot_domains(c,date_range,key):
-    domain_count = date_count(c, f"select domain as ts,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by domain order by c desc",date_range)
-    ssdb_save_json(f"{env}.base.domain.{key}", domain_count)
-    huashu_count = date_count(c,f"select catemr as ts,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by catemr order by c desc",date_range)
-    ssdb_save_json(f"{env}.base.huashu.{key}",huashu_count)
+    domain_count = date_count(c, f"select domain as ts,count(1) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by domain order by c desc",date_range)
+    ssdb_save_json('base.domain.' + key, domain_count)
+    huashu_count = date_count(c,f"select catemr as ts,count(1) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by catemr order by c desc",date_range)
+    ssdb_save_json(f'{env}.base.huashu.'+key,huashu_count)
 
 def hot_intents(c,date_range,key):
-    intent_count = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by intents order by c desc",date_range)
-    ssdb_save_json(f"{env}.base.intents.{key}", intent_count)
+    intent_count = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s and catemr='task' group by intents order by c desc",date_range)
+    ssdb_save_json(f'{env}.base.intents.' + key, intent_count)
 
 def nlu_type(c,date_range,key):
-    nt = date_count(c, f"select nlu_type as ts,count(*) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by nlu_type",date_range)
+    nt = date_count(c, f"select nlu_type as ts,count(*) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by nlu_type",date_range)
     #data = {'正常':nt['0'],"nlu正常走兜底":nt['1'],'nlu部分理解走兜底':nt['2'],'nlu完全不理解':nt['3']}
     data = {'0': nt.get('0',0), "1": nt.get('1',0), '2': nt.get('2',0), '3': nt.get('3',0)}
-    ssdb_save_json(f"{env}.base.nlu_type.{key}", data)
+    ssdb_save_json(f'{env}.base.nlu_type.' + key, data)
 
 def nlu_type_data(c,date_range,key):
-    c.execute(f"select nlu_type,session_id from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s",date_range)
+    c.execute(f"select nlu_type,session_id from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s",date_range)
     rs = c.fetchall()
     data = [[],[],[],[]]
 
@@ -30,19 +31,19 @@ def nlu_type_data(c,date_range,key):
         type = r.get('nlu_type')
         data[type].append(r.get('session_id'))
     for i in range(1,4):
-        ssdb_save_json(f"{env}.base.nlu_type.{key}.{i}", data[i])
+        ssdb_save_json(f'{env}.base.nlu_type.' + key+"."+ str(i), data[i])
 
 def hour_distrib(c, pp, key):
-    hour_query = date_count(c,f"SELECT hour(ts) as ts,count(1) as c FROM `debug_query` where env='{env}' and date(ts)>=%s and date(ts)<=%s group by hour(ts)",pp)
-    ssdb_save_json(f"{env}.base.hourly.{key}", hour_query)
+    hour_query = date_count(c,f"SELECT hour(ts) as ts,count(1) as c FROM `debug_query` where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by hour(ts)",pp)
+    ssdb_save_json(f'{env}.base.hourly.' + key, hour_query)
 
 def basic_usage(c, pp, key):
     # query数
-    date_query = get_count(c,f"SELECT count(1) as c FROM `debug_query` where env='{env}' and date(ts)>=%s and date(ts)<=%s",pp)
+    date_query = get_count(c,f"SELECT count(1) as c FROM `debug_query` where env='{prod}' and date(ts)>=%s and date(ts)<=%s",pp)
     # session数
-    date_session = get_count(c,f"SELECT count(distinct(session_id)) as c FROM `debug_query` where env='{env}' and date(ts)>=%s and date(ts)<=%s",pp)
+    date_session = get_count(c,f"SELECT count(distinct(session_id)) as c FROM `debug_query` where env='{prod}' and date(ts)>=%s and date(ts)<=%s",pp)
     # 使用车辆数
-    c.execute(f"select distinct(vehicle_id) as vid from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s",pp)
+    c.execute(f"select distinct(vehicle_id) as vid from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s",pp)
     act_vids = []
     rs = c.fetchall()
     for r in rs:
@@ -54,27 +55,27 @@ def basic_usage(c, pp, key):
     ssdb_save_json(f"{env}.base.info." + key, data)
 
 def total_domain_intents_dist(c):
-    huashu_dist = date_count(c,f"select catemr as ts,count(1) as c from debug_query where env='{env}' group by catemr",())
-    domain_dist = date_count(c,f"select domain as ts,count(1) as c from debug_query where env='{env}' and catemr='task' group by domain",())
-    intents_dist = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{env}' and catemr='task' group by intents",())
+    huashu_dist = date_count(c,f"select catemr as ts,count(1) as c from debug_query where env='{prod}' group by catemr",())
+    domain_dist = date_count(c,f"select domain as ts,count(1) as c from debug_query where env='{prod}' and catemr='task' group by domain",())
+    intents_dist = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{prod}' and catemr='task' group by domain",())
 
     ssdb_save_json(f"{env}.total.domain",domain_dist)
     ssdb_save_json(f"{env}.total.huashu",huashu_dist)
     ssdb_save_json(f"{env}.total.intents", intents_dist)
 
-    c.execute(f"SELECT distinct(domain) as d FROM `debug_query` where env='{env}'")
+    c.execute(f"SELECT distinct(domain) as d FROM `debug_query` where env='{prod}'")
     rs = c.fetchall()
     for r in rs:
         d = r.get('d')
-        intent_dist = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{env}' and catemr='task' and domain=%s group by intents",(d))
-        ssdb_save_json(f"{env}.total.intents."+d.lower(), intent_dist)
+        intent_dist = date_count(c,f"select intents as ts,count(1) as c from debug_query where env='{prod}' and catemr='task' and domain=%s group by intents",(d))
+        ssdb_save_json(f'{env}.total.intents.'+d.lower(), intent_dist)
 
 def snapshot_report(c,k):
     total_domain_intents_dist(c)
 
 def city_query(c,dr, key):
-    cq = date_count(c,f"select city as ts,count(request_id) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by city",dr)
-    cv = date_count(c,f"select city as ts,count(distinct(vehicle_id)) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by city",dr)
+    cq = date_count(c,f"select city as ts,count(request_id) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by city",dr)
+    cv = date_count(c,f"select city as ts,count(distinct(vehicle_id)) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by city",dr)
 
     data = []
     for i in cv:
@@ -92,13 +93,13 @@ def period_report(c, dr, k,detail_info=False):
     hour_distrib(c, dr, k)
     nav_path(c, dr, k, env, detail_info=detail_info)
     call_path(c, dr, k, env, detail_info=detail_info)
-    query_frequency(c,dr,k)
+
     city_query(c,dr,k)
 
 def nomi_usage_vids(c,dr,key):
-    cq = date_count(c, f"select vehicle_id as ts,count(request_id) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s group by vehicle_id",dr)
-    vu = date_count(c, f"select vehicle_id as ts ,DATEDIFF(%s,activate_time) as c from car_delivery where env='{env}' and date(activate_time)<=%s",(dr[1],dr[1]))
-    vd = date_count(c,f"select vehicle_id as ts ,date(activate_time) as c from car_delivery where env='{env}' ",())
+    cq = date_count(c, f"select vehicle_id as ts,count(request_id) as c from debug_query where env='{prod}' and date(ts)>=%s and date(ts)<=%s group by vehicle_id",dr)
+    # vu = date_count(c, "select vehicle_id as ts ,DATEDIFF(%s,activate_time) as c from es8_delivery where env='{prod}' and type=1 and date(activate_time)<=%s",(dr[1],dr[1]))
+    # vd = date_count(c,"select vehicle_id as ts ,date(activate_time) as c from es8_delivery where type=1",())
 
     dt = datetime.strptime(dr[1], "%Y-%m-%d")
     # 当月最大天数
@@ -117,22 +118,13 @@ def nomi_usage_vids(c,dr,key):
         data.append(l)
     ssdb_save_json('vid.usage.'+key,data)
 
-def query_frequency(c,dr,key):
-    c.execute(f"select query as q,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and length(query)>0 group by query order by c desc limit 200",dr)
-    rs = c.fetchall()
-    o = []
-    for r in rs:
-        o.append({'query':r.get('q'),'count':r.get('c')})
-    
-    ssdb_save_json(f"{env}.query.frequency.{key}",o)
-
 def daily_report(c,dt):
     c.execute("SET time_zone = '+8:00'")
     k = 'd.'+dt.replace("-","")
     dr = (dt,dt)
 
     period_report(c,dr,k,detail_info=True)
-    retention.daily(datetime.strptime(dt, "%Y-%m-%d"))
+    #retention.daily(datetime.strptime(dt, "%Y-%m-%d"))
 
 def weekly_report(c,monday):
     c.execute("SET time_zone = '+8:00'")
@@ -152,7 +144,7 @@ def monthly_report(c, year,month):
     m_key = get_month_key(year,month)
 
     period_report(c,dr,m_key, detail_info=False)
-    nomi_usage_vids(c,dr,m_key)
+    #nomi_usage_vids(c,dr,m_key)
 
     retention.monthly(year,month)
 
@@ -183,7 +175,8 @@ def today(c):
     for i in range(0,2):
         monday = today - timedelta(days=(today.weekday() + i*7))
         weekly_report(c,monday)
-    monthly_report(c, 2020, today.month)
+    monthly_report(c, 2019, today.month)
+    monthly_report(c, 2019, today.month-1)
 
     snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
 
@@ -196,18 +189,15 @@ def dev(c):
     # monthly_report(c, 2018, 10)
     # gen_all_monthly_data(c)
     # gen_all_daily_data(c)
-    # monthly_report(c, 2019, 12)
-    # today = date.today()
-    # yesterday = today - timedelta(days=1)   
-    # daily_report(c, yesterday.strftime('%Y-%m-%d'))
-    # snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
+
 
 if __name__ == '__main__':
     init()
     db = conn['db']
 
     with db.cursor() as c:
-        prod(c)
-
-    hourly_task.run_task()
-    
+        #prod(c)
+        #monthly_report(c, 2018, 12)
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        daily_report(c, yesterday.strftime('%Y-%m-%d'))
