@@ -1,0 +1,36 @@
+server:
+  port: 8099
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.25.9.37:3306/sariel?characterEncoding=utf8&autoReconnect=true
+    username: ais-dev
+    password: QAdr45mfrkled
+    cachePrepStmts: true
+    prepStmtCacheSize: 250
+    prepStmtCacheSqlLimit: 2048
+    useServerPrepStmts: true
+
+security:
+  jwt:
+    token:
+      secret-key: MFivmer9Xj4z84z24Ds20f
+      expire-length: 604800000
+
+mqtt:
+  url: ssl://xmars-test.x-tetris.com:20191
+
+veh:
+  log:
+    url:
+      prefix: /logs/
+    path: /var/www/html/ndata/logs
+
+ssdb:
+  main:
+    host: 10.25.9.37
+    port: 13231
+  bcp:
+    host: 10.86.11.20
+    port: 31120

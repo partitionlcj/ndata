@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,16 +32,18 @@ public class ReportController {
     Logger logger = LoggerFactory.getLogger(ReportController.class);
 
     @Autowired
+    @Qualifier("mainSSDB")
     JedisPool pool;
+    @Autowired
+    @Qualifier("bcpSSDB")
+    JedisPool wavPool;
 
-    JedisPool wavPool = new JedisPool("10.86.11.20",31120);
-    JedisPool devWavPool = new JedisPool("10.25.9.37",13231);
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/audio/wakeup_wav")
+    @GetMapping("/api/audio/wakeup_wav")
     public void downloadWakeupWav(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
-        try(Jedis dr = devWavPool.getResource()) {
+        try(Jedis dr = pool.getResource()) {
             String asrId = "WAKEUP_"+rid;
             byte[] data = dr.get((asrId).getBytes());
 
@@ -52,9 +55,9 @@ public class ReportController {
         }
     }
 
-    @GetMapping("/audio/download_wav")
+    @GetMapping("/api/audio/download_wav")
     public void downloadWavByRid(@RequestParam("requestId") String rid, HttpServletResponse response) throws Exception {
-        try(Jedis dr = devWavPool.getResource()) {
+        try(Jedis dr = pool.getResource()) {
             String asrId = rid;
             byte[] data = dr.get((asrId).getBytes());
 
@@ -73,7 +76,7 @@ public class ReportController {
         }
     }
 
-    @GetMapping("/ssdb/wav")
+    @GetMapping("/api/ssdb/wav")
     public void downloadWav(@RequestParam("key") String key, HttpServletResponse response) throws Exception {
         Jedis r = wavPool.getResource();
         byte[] data = r.get(key.getBytes());
@@ -86,7 +89,7 @@ public class ReportController {
     }
 
 
-    @RequestMapping( value = "/ssdb/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping( value = "/api/ssdb/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSsdbData(@RequestParam(defaultValue = "") String keys) throws Exception {
         Jedis ssdb = pool.getResource();
 
@@ -110,7 +113,7 @@ public class ReportController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(data), HttpStatus.OK);
     }
 
-    @PostMapping("/common/read_page_ssdb")
+    @PostMapping("/api/common/read_page_ssdb")
     public ResponseEntity  commonReadPageSsdb(@RequestBody String json) throws Exception {
         Gson g = new Gson();
         JsonObject params = g.fromJson(json, JsonObject.class);
@@ -162,7 +165,7 @@ public class ReportController {
     }
 
     private static final String[] JSON_COLUMNS = {"input","output","nlp_result","model_results","rule_da_result","nlu_result","server_state"};
-    @GetMapping("/debug/getReqInfo")
+    @GetMapping("/api/debug/getReqInfo")
     public ResponseEntity<Object> getReqInfo(@RequestParam("rid")String rid){
         Map r = jdbcTemplate.queryForMap("select * from dialogue.request_info where id=?", new Object[]{rid});
         JsonArray jr = new JsonArray();
@@ -170,7 +173,7 @@ public class ReportController {
         return new ResponseEntity<Object>(GsonUtil.instance().toJson(jr), HttpStatus.OK);
     }
 
-    @GetMapping("/debug/getVosReqInfo")
+    @GetMapping("/api/debug/getVosReqInfo")
     public ResponseEntity<Object> getVosReqInfo(@RequestParam("rid")String rid){
         Map r = jdbcTemplate.queryForMap("select * from dialogue.vos_request_info where request_id=?", new Object[]{rid});
         JsonArray jr = new JsonArray();
@@ -215,18 +218,18 @@ public class ReportController {
         }
     }
 
-    @GetMapping("/debug/output")
+    @GetMapping("/api/debug/output")
     public ResponseEntity<Object> getOutput(@RequestParam("rid")String rid){
         String output = jdbcTemplate.queryForObject("select output from debug_query where request_id=?", new Object[]{rid}, String.class);
         return new ResponseEntity<Object>(RestResult.getSuccessResult(output), HttpStatus.OK);
     }
 
-    @PostMapping("/sp/com/batch_comment")
+    @PostMapping("/api/sp/com/batch_comment")
     public ResponseEntity<String> getComment(){
         return ResponseEntity.ok("{}");
     }
 
-    @PostMapping("/common/report")
+    @PostMapping("/api/common/report")
     public ResponseEntity commonReport(@RequestBody String json) throws Exception {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(getReport(json)), HttpStatus.OK);
     }

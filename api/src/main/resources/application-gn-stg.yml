@@ -1,0 +1,30 @@
+server:
+  port: 8084
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://172.25.5.222:3306/ndata?characterEncoding=utf8&autoReconnect=true
+    username: report_w
+    password: btp9PrtDamlE2Qzv
+    cachePrepStmts: true
+    prepStmtCacheSize: 250
+    prepStmtCacheSqlLimit: 2048
+    useServerPrepStmts: true
+
+mqtt:
+  url: ssl://xmars-test.x-tetris.com:20191
+
+veh:
+  log:
+    url:
+      prefix: /logs/
+    path: /var/www/html/ndata/logs
+
+ssdb:
+  main:
+    host: k8s-ssdb-svc
+    port: 8888
+  bcp:
+    host: k8s-ssdb-svc
+    port: 8888

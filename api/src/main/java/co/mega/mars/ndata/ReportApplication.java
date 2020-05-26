@@ -1,8 +1,12 @@
 package co.mega.mars.ndata;
 
+import org.apache.tomcat.util.http.LegacyCookieProcessor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -15,9 +19,23 @@ import redis.clients.jedis.JedisPool;
 @SpringBootApplication
 public class ReportApplication {
 
-	@Bean
-	public JedisPool getPool(){
-		return new JedisPool("10.25.9.37",13231);
+	@Value("${ssdb.main.host}")
+	String ssdbHost;
+	@Value("${ssdb.main.port}")
+	int ssdbPort;
+	@Value("${ssdb.bcp.host}")
+	String ssdbBcpHost;
+	@Value("${ssdb.bcp.port}")
+	int ssdbBcpPort;
+
+	@Bean("bcpSSDB")
+	public JedisPool getBcpPool(){
+		return new JedisPool(ssdbBcpHost,ssdbBcpPort);
+	}
+
+	@Bean("mainSSDB")
+	public JedisPool getMainPool(){
+		return new JedisPool(ssdbHost,ssdbPort);
 	}
 
 	public static void main(String[] args) {

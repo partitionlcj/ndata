@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,7 +33,7 @@ public class VehLogController {
     @Value("${veh.log.url.prefix}")
     String logFilePrefix;
 
-    @GetMapping("/vehlog/vids")
+    @GetMapping("/api/vehlog/vids")
     public ResponseEntity<Object> getVidList(){
         Set<String> vids = new HashSet<>();
         File root = new File(vehLogPath);
@@ -96,7 +97,7 @@ public class VehLogController {
         return logs;
     }
 
-    @GetMapping("/vehlog/searchLog")
+    @GetMapping("/api/vehlog/searchLog")
     public ResponseEntity<Object> searchLog(String vid, String appId){
         List<VehLog> r = searchLogs(vid, appId, "aws");
         List<VehLog> r1 = searchLogs(vid,appId, "gn");
@@ -104,7 +105,7 @@ public class VehLogController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(r), HttpStatus.OK);
     }
 
-    @PostMapping("/vehlog/requestLog")
+    @PostMapping("/api/vehlog/requestLog")
     public ResponseEntity<Object> requestLog(@RequestBody RequestLogForm form){
         log.info("requst log : {}",form);
         try {

@@ -31,7 +31,7 @@ public class MarsSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/auth_token").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/auth_token").permitAll()
                 .antMatchers(HttpMethod.GET, "/**").hasRole("NDATA_USER")
                 .antMatchers(HttpMethod.POST, "/**").hasRole("NDATA_USER")
                 //.antMatchers(HttpMethod.GET, "/**").hasRole("REPORT_USER")
