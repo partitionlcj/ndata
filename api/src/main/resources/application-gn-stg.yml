@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://172.25.5.222:3306/ndata?characterEncoding=utf8&autoReconnect=true
+    url: jdbc:mysql://172.25.5.222:3306/report_stg?characterEncoding=utf8&autoReconnect=true
     username: report_w
     password: btp9PrtDamlE2Qzv
     cachePrepStmts: true
