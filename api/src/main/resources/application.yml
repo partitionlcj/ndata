@@ -33,8 +33,8 @@ logging:
   level:
     org.springframework.web: INFO
     org.springframework.security: INFO
-    co.mega: DEBUG
-  file: app.log
+    co.mega: INFO
+  file: log/app.log
 
 security:
   jwt:
