@@ -22,6 +22,7 @@ RUN yum update -y && \
 ENV USER_DIR /data/app/mars-ops
 
 RUN yum -y install tar
+RUN yum -y install vim
 RUN yum -y install mysql
 RUN yum -y install python3
 RUN yum -y install python3-pip
