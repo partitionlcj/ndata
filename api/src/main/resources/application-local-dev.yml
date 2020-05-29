@@ -1,10 +1,10 @@
 server:
-  port: 8084
+  port: 8099
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.25.9.37:3306/ndata?characterEncoding=utf8&autoReconnect=true
+    url: jdbc:mysql://10.25.9.37:3306/sariel?characterEncoding=utf8&autoReconnect=true
     username: ais-dev
     password: QAdr45mfrkled
     cachePrepStmts: true

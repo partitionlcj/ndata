@@ -76,7 +76,7 @@ export default {
         title: '退出登录提示',
         content: '退出成功，感谢您的使用～～',
         onOk: () => {
-          window.open(this.$aisUtil.login(this.$appName), '_self');
+          document.location = "/"
         }
       });
     }

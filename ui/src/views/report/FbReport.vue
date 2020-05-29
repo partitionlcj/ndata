@@ -102,7 +102,9 @@ export default {
         label: 'Intent分布',
         key: 'intents',
         component: 'IntentReport'
-      }, {
+      }, 
+      /*
+      {
         label: '导航意图',
         key: 'navigation_funnel',
         component: 'NaviCallFunnelReport'
@@ -114,7 +116,9 @@ export default {
         label: '用户留存',
         key: 'retention',
         component: 'RetentionReport'
-      }, {
+      }, 
+      */
+      {
         label: '话术分类',
         key: 'huashu',
         component: 'HuashuReport'
@@ -127,7 +131,7 @@ export default {
         key: 'query.frequency',
         component: 'MostUsedQuery'
       }]
-
+      /*
       if (this.type === 'monthly') {
         tabs.push({
           label: 'vid.usage',
@@ -144,6 +148,7 @@ export default {
         }
         )
       }
+      */
       return tabs
     },
     reportType() {

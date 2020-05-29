@@ -30,6 +30,7 @@ const mutations = {
   LOGOUT(state, info) {
     aisTool.Cookie.delData('ops-name');
     aisTool.Cookie.delData('ops-role');
+    aisTool.Cookie.delData('ops-org');
     aisTool.Cookie.delData('mars_token');
     state.name = '';
     state.role = '';
