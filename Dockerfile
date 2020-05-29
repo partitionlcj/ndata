@@ -37,6 +37,7 @@ WORKDIR /data/app/mars-ndata
 COPY ./api/target/ndata-0.0.1-SNAPSHOT.jar ./
 COPY ./api/src/main/resources/*.yml ./
 COPY ./ui/dist ./static
+COPY ./scripts ./
 COPY ./start.sh ./
 
 EXPOSE 8000
