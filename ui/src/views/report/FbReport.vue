@@ -82,11 +82,7 @@ export default {
   },
   computed: {
     tabs() {
-      let tabs = [{
-        label: '基本信息',
-        key: 'info',
-        component: 'BaseInfoReport'
-      }, {
+      let tabs = [ {
         label: 'Domain分布',
         key: 'domain',
         component: 'DomainReport'
@@ -104,6 +100,11 @@ export default {
         component: 'IntentReport'
       }, 
       /*
+      {
+        label: '基本信息',
+        key: 'info',
+        component: 'BaseInfoReport'
+      },
       {
         label: '导航意图',
         key: 'navigation_funnel',

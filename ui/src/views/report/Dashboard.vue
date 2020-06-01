@@ -21,10 +21,6 @@
         <h5>{{item.name}}</h5>
       </Card>
     </div>
-    <AisTable :columns="topDomain.head" :data="topDomain.data" :show-page="false" table-title="Domain" class="margin-bottom-20 margin-top-10" />
-    <AisTable :columns="top10Intent.head" :data="top10Intent.data" :show-page="false" table-title="Top10Intent" class="margin-bottom-20" />
-    <AisTable :columns="topUser.head" :data="topUser.data" :show-page="false" table-title="活跃用户" class="margin-bottom-20" />
-    <AisTable :columns="topMonthUser.head" :data="topMonthUser.data" :show-page="false" table-title="近一个月活跃用户" class="margin-bottom-20" />
   </div>
 </template>
 <script>

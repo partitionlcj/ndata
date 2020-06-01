@@ -263,7 +263,6 @@ def pipeline():
 
 def audio_dump(rid, ts, provider='aws'):
     dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
-    bucket = BUCKET_NAME
 
     bucket = 'ais-storage-gz'
     s3 = boto3.resource(
@@ -288,7 +287,7 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = rid
-    p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata')
+    p = Popen(["../SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata')
     output, err = p.communicate("")
 
 def save2ssdb(rid):

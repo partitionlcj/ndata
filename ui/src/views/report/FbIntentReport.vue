@@ -35,23 +35,6 @@ export default {
         title: '记录数',
         key: 'num',
         align: 'center'
-      }, {
-        title: '查看',
-        align: 'center',
-        width: 100,
-        render: (h, params) => {
-          return h('Button', {
-            props: {
-              type: 'primary',
-              size: 'small'
-            },
-            on: {
-              click: () => {
-                this.viewQueryDetail(this.domain, params.row.intent || 'null');
-              }
-            }
-          }, '查看');
-        }
       }],
       data: []
     }

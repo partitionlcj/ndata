@@ -22,3 +22,4 @@ def init():
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor,
     )
+    return conn
