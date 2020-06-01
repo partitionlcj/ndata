@@ -28,7 +28,7 @@ RUN yum -y install python3
 RUN yum -y install python3-pip
 
 RUN python3 -m pip install --upgrade pip && \
-    pip3 install --no-cache-dir pymysql boto3 wave
+    pip3 install --no-cache-dir pymysql boto3 wave pyssdb
 
 
 RUN mkdir -p /data/app/mars-ndata
@@ -37,7 +37,7 @@ WORKDIR /data/app/mars-ndata
 COPY ./api/target/ndata-0.0.1-SNAPSHOT.jar ./
 COPY ./api/src/main/resources/*.yml ./
 COPY ./ui/dist ./static
-COPY ./scripts ./
+COPY ./scripts ./scripts
 COPY ./start.sh ./
 
 EXPOSE 8000
