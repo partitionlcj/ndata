@@ -12,14 +12,6 @@
         <Col span="4" class="margin-bottom-10">
           <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="2" class="margin-bottom-10">
-        <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
-        </Col>
-      </template>
-      <Col span="6" class="margin-bottom-10">
-      <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
-      </Col>
-      <template v-if="reportName=='fact-data'">
         <Col span="4" class="margin-bottom-10">
         <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
         </Col>
@@ -36,6 +28,14 @@
           <Input placeholder="唤醒词" v-model="filter.wakeup_asr_text" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
+      <Col span="6" class="margin-bottom-10">
+      <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <template v-if="isMega">
+        <Col span="2" class="margin-bottom-10">
+          <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
+        </Col>
+      </template>
       </Col>
     </Row>
     <Table :columns="columns" :data="data" :loading="loading" :row-class-name="currentViewRowCls" class="detail-table"></Table>
@@ -45,6 +45,7 @@
   </div>
 </template>
 <script>
+import aisTool from 'ais-components';
 import api from '../../api';
 import real from '../../api/real';
 import InfoModal from '../../components/Modal/InfoModal';
@@ -91,6 +92,9 @@ export default {
     }
   },
   computed: {
+    isMega() {
+      return aisTool.Cookie.getData("ops-org") === "mega"
+    },
     columns() {
       let columns = [
         {
@@ -158,10 +162,6 @@ export default {
           key: 'operation',
           minWidth: 100
         }, {
-          title: 'env',
-          key: 'env',
-          minWidth: 80
-        }, {
           title: '音频',
           width: 70,
           render: (h, params) => {
@@ -198,51 +198,61 @@ export default {
           minWidth: 100,
         }
         )
-      //}
+      
+      if( aisTool.Cookie.getData("ops-org") === "mega" ){
+        columns.push({
+            title: 'env',
+            key: 'env',
+            minWidth: 80
+          })
+        columns.push({
+          title: '详情',
+          width: 100,
+          align: 'center',
+          key: 'detail',
+          render: (h, params) => {
+            return h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small'
+              },
+              on: {
+                click: () => {
+                  this.currentViewRow = params.row._index;
+                  this.viewDetail(params.row.session_id,params.row.request_id);
+                }
+              }
+            }, '详情');
+          }
+        })
+        columns.push({
+          title: 'ReqInfo',
+          width: 100,
+          align: 'center',
+          key: 'detail',
+          render: (h, params) => {
+            return h('Button', {
+              props: {
+                type: 'primary',
+                size: 'small'
+              },
+              on: {
+                click: () => {
+                  this.currentViewRow = params.row._index;
+                  window.open("/api/debug/getReqInfo?rid="+params.row.request_id, "_blank")
+                }
+              }
+            }, 'ReqInfo');
+          }
+        })
+      }
+
       columns.push({
         title: '更新时间',
         key: 'updated_at',
         minWidth: 100,
-      }, {
-        title: '详情',
-        width: 100,
-        align: 'center',
-        key: 'detail',
-        render: (h, params) => {
-          return h('Button', {
-            props: {
-              type: 'primary',
-              size: 'small'
-            },
-            on: {
-              click: () => {
-                this.currentViewRow = params.row._index;
-                this.viewDetail(params.row.session_id,params.row.request_id);
-              }
-            }
-          }, '详情');
-        }
       });
-      columns.push({
-        title: 'ReqInfo',
-        width: 100,
-        align: 'center',
-        key: 'detail',
-        render: (h, params) => {
-          return h('Button', {
-            props: {
-              type: 'primary',
-              size: 'small'
-            },
-            on: {
-              click: () => {
-                this.currentViewRow = params.row._index;
-                window.open("/api/debug/getReqInfo?rid="+params.row.request_id, "_blank")
-              }
-            }
-          }, 'ReqInfo');
-        }
-      })
+      
       return columns;
     }
   },
