@@ -1,7 +1,6 @@
 import sys, json, datetime, os
 import pymysql
-from config import *
-from db_gn import *
+from config_gn import *
 import city
 import time
 import boto3
@@ -107,7 +106,7 @@ class HuDataTracking(object):
         self.session_id = ri['session_id']
         self.user_id = ri['user_id']
         self.vehicle_id = ri['vehicle_id']
-        self.env = ri['env']
+        self.env = 'ds-mars-prod'
         self.query = ri['query']
 
         if self.query == None:
@@ -287,7 +286,7 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = rid
-    p = Popen(["../SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata')
+    p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata/scripts')
     output, err = p.communicate("")
 
 def save2ssdb(rid):

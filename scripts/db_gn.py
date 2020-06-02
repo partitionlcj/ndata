@@ -2,6 +2,7 @@ import pymysql
 import pyssdb
 
 def init():
+    conn = {}
     conn['ssdb'] = pyssdb.Client(host='k8s-ssdb-svc',port=8888)
     conn['db'] = pymysql.connect(
         host='172.25.5.222',

@@ -1,4 +1,3 @@
-from config import *
 from navi_funnel import *
 from call_funnel import *
 import retention
@@ -56,7 +55,7 @@ def basic_usage(c, pp, key):
     ssdb_save_json(f"{env}.base.info." + key, data)
 
 def total_domain_intents_dist(c):
-    huashu_dist = date_count(c,f"select catemr as ts,count(1) as c from debug_query where group by catemr",())
+    huashu_dist = date_count(c,f"select catemr as ts,count(1) as c from debug_query group by catemr",())
     domain_dist = date_count(c,f"select domain as ts,count(1) as c from debug_query where  catemr='task' group by domain",())
     intents_dist = date_count(c,f"select intents as ts,count(1) as c from debug_query where  catemr='task' group by domain",())
 
@@ -73,6 +72,15 @@ def total_domain_intents_dist(c):
 
 def snapshot_report(c,k):
     total_domain_intents_dist(c)
+
+def query_frequency(c,dr,key):
+    c.execute(f"select query as q,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and length(query)>0 group by query order by c desc limit 200",dr)
+    rs = c.fetchall()
+    o = []
+    for r in rs:
+        o.append({'query':r.get('q'),'count':r.get('c')})
+
+    ssdb_save_json(f"{env}.query.frequency.{key}",o)
 
 def city_query(c,dr, key):
     cq = date_count(c,f"select city as ts,count(request_id) as c from debug_query where  date(ts)>=%s and date(ts)<=%s group by city",dr)
@@ -92,9 +100,9 @@ def period_report(c, dr, k,detail_info=False):
     nlu_type_data(c, dr, k)
     basic_usage(c, dr, k)
     hour_distrib(c, dr, k)
-    nav_path(c, dr, k, env, detail_info=detail_info)
-    call_path(c, dr, k, env, detail_info=detail_info)
-
+    # nav_path(c, dr, k, env, detail_info=detail_info)
+    # call_path(c, dr, k, env, detail_info=detail_info)
+    query_frequency(c,dr,k)
     city_query(c,dr,k)
 
 def nomi_usage_vids(c,dr,key):
@@ -137,7 +145,7 @@ def weekly_report(c,monday):
 
     dr = ( monday.strftime('%Y-%m-%d'), sunday.strftime('%Y-%m-%d'))
     period_report(c,dr,k, detail_info=False)
-    retention.weekly(monday)
+    #retention.weekly(monday)
 
 def monthly_report(c, year,month):
     c.execute("SET time_zone = '+8:00'")
@@ -147,7 +155,7 @@ def monthly_report(c, year,month):
     period_report(c,dr,m_key, detail_info=False)
     #nomi_usage_vids(c,dr,m_key)
 
-    retention.monthly(year,month)
+    #retention.monthly(year,month)
 
 def gen_all_daily_data(c):
     for dt in get_all_days():

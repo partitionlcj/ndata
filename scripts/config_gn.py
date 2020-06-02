@@ -4,7 +4,7 @@ import datetime
 import pyssdb
 from db_gn import *
 
-conn={}
+conn=init()
 black_list = set()
 cates = {'1': 'task', '2': 'user_manual', '4': 'chat', '8': 'query_answering'}
 
