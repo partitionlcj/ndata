@@ -132,6 +132,11 @@ class HuDataTracking(object):
         input = json.loads(ri['input'])
         self.query_inhouse = input.get('queryInhouse',None)
         self.oneshot = input.get('oneshot', None)
+       
+        q = input.get("query",None)
+        if q != None and q != self.query:
+            print("[Fix] find query correction: " + q)
+            self.query = self.query + "^" + q
 
         extra = input.get('extra',{})
         self.voice_id = int(extra.get('voiceId',0))
