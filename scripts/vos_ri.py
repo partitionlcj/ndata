@@ -56,7 +56,13 @@ def parse(o, vri):
     operations = finalResponse.get("operations")
     if operations != None:
       vri.operations = json.dumps(operations)
-    
+
+  finalAsrResult = o.get('finalAsrResult')
+  if finalAsrResult != None and vri.query == '' :
+    vri.query = finalAsrResult.get('online_result','')
+    if vri.query == '':
+      vri.query = finalAsrResult.get('offline_result','')
+  
   vri.use_cloud_response = o.get("isUsingCloudResponse")
 
 def test():
@@ -89,7 +95,7 @@ def vos_ri():
   total_query = 0
   insert_query = 0
 
-  back_time = 10*24*60*60*1000
+  back_time = 30*24*60*60*1000
 
   ts_end = int(time.time()*1000)
   ts = ts_end - back_time
@@ -109,6 +115,7 @@ def vos_ri():
           print(f"fail to parse {data}")
           continue
         vri = VosReqInfo()
+        vri.request_id = rid
         vri.env = r.get("env")
         vri.start_time = r.get("start_time")
         vri.end_time = r.get("end_time")
@@ -123,6 +130,7 @@ def vos_ri():
             vri.intents = rr.get('intents','')
             vri.wakeup = rr.get('wakeup')
             vri.wakeup_asr_text = rr.get('wakeup_asr_text','')
+        #print(vri.to_sql_params())
         c.execute("REPLACE INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`,domain,intents,wakeup,wakeup_asr_text) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s,%s,%s,%s)",vri.to_sql_params() )
   db.commit()
   print("vos di complete")

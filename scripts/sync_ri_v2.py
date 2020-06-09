@@ -134,7 +134,7 @@ class HuDataTracking(object):
         self.oneshot = input.get('oneshot', None)
        
         q = input.get("query",None)
-        if q != None and q != self.query:
+        if q != None and self.query != 'N/A' and  q != self.query:
             print("[Fix] find query correction: " + q)
             self.query = self.query + "^" + q
 
