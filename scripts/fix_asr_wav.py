@@ -272,7 +272,7 @@ def pipeline():
         print(f"total {total_query} queries, insert {insert_query} queries")
 
 def asr_pipeline():
-    back_time = 1*60*60*1000
+    back_time = 365*24*60*60*1000
 
     ts_end = int(time.time()*1000) 
     ts = ts_end - back_time
@@ -280,7 +280,7 @@ def asr_pipeline():
     wav_num = 0
 
     with db_ri.cursor() as c1:
-        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and env not like %s and env not like %s",(ts,ts_end,'%int%','%dev%'))
+        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and env not like %s and env not like %s",(ts,ts_end,'%int%','%dev%'))        
         rs1 = c1.fetchall()
 
         for r1 in rs1:
@@ -359,6 +359,5 @@ if __name__ == '__main__':
     db = conn['db']
     db_ri = conn['db_ri']
     asr_pipeline()
-    pipeline()
     
     
