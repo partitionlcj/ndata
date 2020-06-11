@@ -28,6 +28,11 @@ const REPORT = {
     icon: 'md-bug',
     name: 'face-data'
   },{
+    label: 'Asr Request Info',
+    to: '/asr_debug',
+    icon: 'md-mic',
+    name: 'face-data'
+  },{
     label: 'VosEvent',
     to: '/vos_event',
     icon: 'md-list',

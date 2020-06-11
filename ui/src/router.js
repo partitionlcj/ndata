@@ -20,6 +20,8 @@ const FbQueryDetailDebug = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbQueryDetailDebug');
 const FbVosDebug = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbVosDebug');
+const FbAsrDebug = () =>
+  import( /* webpackChunkName: "report" */ './views/report/FbAsrDebug');
 const FbVosEvent = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbVosEvent');
 const FbVehLog = () =>
@@ -126,24 +128,39 @@ const routes = [{
       }],
     },
     component: FbVosDebug
-  }
-]
-}, 
-{
-  path: '/vos_event',
-  component: Main,
-  children: [{
-    path: '',
-    name: 'vos_event',
-    meta: {
-      bread: [{
-        label: 'vos_event',
-        to: '/vos_event'
-      }],
-    },
-    component: FbVosEvent
   }]
-},
+  },
+  {
+    path: '/asr_debug',
+    component: Main,
+    children: [{
+      path: '',
+      name: 'asr_debug',
+      meta: {
+        bread: [{
+          label: 'asr_debug',
+          to: '/asr_debug'
+        }],
+      },
+      component: FbAsrDebug
+    }
+  ]
+  },
+  {
+    path: '/vos_event',
+    component: Main,
+    children: [{
+      path: '',
+      name: 'vos_event',
+      meta: {
+        bread: [{
+          label: 'vos_event',
+          to: '/vos_event'
+        }],
+      },
+      component: FbVosEvent
+    }]
+  },
 {
   path: '/veh_log',
   component: Main,

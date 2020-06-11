@@ -100,6 +100,20 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
+  getAsrDebugData(begin_date, end_date, requestId, query, vid, env, appId, pageIndex, pageSize) {
+    return base('post', COMMON.report, {
+      report_name: "asr_debug",
+      pageIndex,
+      pageSize,
+      begin_date,
+      end_date,
+      request_id: `%${requestId}%`,
+      query: `%${query}%`,
+      vid: `%${vid}%`,
+      env: `%${env}%`,
+      appId: `%${appId}%`
+    });
+  },
   getVosEventData(begin_date, end_date, app_id, event_type, vid, env, pageIndex, pageSize) {
     return base('post', COMMON.report, {
       report_name: "vos_event_query",
