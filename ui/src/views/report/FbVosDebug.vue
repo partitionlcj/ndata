@@ -24,6 +24,9 @@
         <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="4" class="margin-bottom-10">
+        <Input placeholder="appId" v-model="filter.appId" @on-enter="pageChange(1)"></Input>
+        </Col>
+        <Col span="4" class="margin-bottom-10">
         <Input placeholder="domain" v-model="filter.domain" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="4" class="margin-bottom-10">
@@ -73,6 +76,7 @@ export default {
         env: '',
         domain: '',
         vid: '',
+        appId: '',
         operation: '',
         intent: '',
         sessionId: '',
@@ -136,10 +140,15 @@ export default {
         });
       }
       columns.push({
+        title: 'appId',
+        key: 'app_id',
+        minWidth: 150,
+      });
+      columns.push({
         title: 'query',
         key: 'query',
         minWidth: 150,
-      });
+      })
       columns.push({
         title: 'tts',
         minWidth: 200,
@@ -287,7 +296,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { requestId, sessionId, query, domain, operation, intent, vid, env, wakeup_asr_text } = this.filter;
+      let { requestId, sessionId, query, domain, operation, intent, vid, appId, env, wakeup_asr_text } = this.filter;
 
       operation = operation
 
@@ -298,7 +307,7 @@ export default {
       this.loading = true;
       let response;
       
-      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), this.pagination.page, this.pagination.pageSize);
+      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), appId, this.pagination.page, this.pagination.pageSize);
     
       this.loading = false;
       let data = response.data;
@@ -315,6 +324,7 @@ export default {
         env: item[10],
         wakeup: item[11],
         wakeup_asr_text: item[12],
+        app_id:item[13],
         hasSubmited: false
       }));
       this.pagination.total = data.total;

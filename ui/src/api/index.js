@@ -62,9 +62,9 @@ export default {
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
-  getDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, pageIndex, pageSize) {
+  getDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, app_id, pageIndex, pageSize) {
     return base('post', COMMON.report, {
-      report_name: "debug1",
+      report_name: "debug2",
       pageIndex,
       pageSize,
       begin_date,
@@ -76,13 +76,14 @@ export default {
       vid: `%${vid}%`,
       intents: `%${intent}%`,
       env: `%${env}%`,
+      app_id: `%${app_id}%`,
       wakeup_asr_text: `%${wakeup_asr_text}%`,
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
-  getVosDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, pageIndex, pageSize) {
+  getVosDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, appId, pageIndex, pageSize) {
     return base('post', COMMON.report, {
-      report_name: "vos_debug1",
+      report_name: "vos_debug2",
       pageIndex,
       pageSize,
       begin_date,
@@ -95,6 +96,7 @@ export default {
       intents: `%${intent}%`,
       env: `%${env}%`,
       wakeup_asr_text: `%${wakeup_asr_text}%`,
+      appId: `%${appId}%`,
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`
     });
   },
