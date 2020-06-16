@@ -15,28 +15,31 @@
         <Col span="4" class="margin-bottom-10">
         <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="4" class="margin-bottom-10">
+        <Col span="2" class="margin-bottom-10">
         <Input placeholder="domain" v-model="filter.domain" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="4" class="margin-bottom-10">
+        <Col span="2" class="margin-bottom-10">
         <Input placeholder="operation;搜空请输入null" v-model="filter.operation" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="4" class="margin-bottom-10">
+        <Col span="2" class="margin-bottom-10">
           <Input placeholder="intent" v-model="filter.intent" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="2" class="margin-bottom-10">
           <Input placeholder="唤醒词" v-model="filter.wakeup_asr_text" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="4" class="margin-bottom-10">
+        <Col span="3" class="margin-bottom-10">
           <Input placeholder="app_id" v-model="filter.app_id" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
-      <Col span="6" class="margin-bottom-10">
+      <Col span="4" class="margin-bottom-10">
       <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
       </Col>
       <template v-if="isMega">
         <Col span="2" class="margin-bottom-10">
           <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
+        </Col>
+        <Col span="15" class="margin-bottom-10">
+          <Input placeholder="自定义查询，会覆盖其他条件, 示例: app_id='100240001' and env !='ds-gn-stg'" v-model="filter.customQuery" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
       </Col>
@@ -82,7 +85,8 @@ export default {
         intent: '',
         sessionId: '',
         requestId: '',
-        wakeup_asr_text: ''
+        wakeup_asr_text: '',
+        customQuery: ''
       },
       data: [],
       currentViewRow: -1
@@ -270,6 +274,7 @@ export default {
     let now = util.getTodayDate();
     //let now = '2019-06-01';
     this.filter.date = [now, now];
+    this.filter.customQuery = aisTool.Cookie.getData("debug_query.custom")
     this.getDomainIntentQueryDetail();
   },
   methods: {
@@ -287,7 +292,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { requestId, sessionId, query, domain, operation, intent, vid, env, wakeup_asr_text, app_id } = this.filter;
+      let { requestId, sessionId, query, domain, operation, intent, vid, env, wakeup_asr_text, app_id, customQuery } = this.filter;
 
       operation = operation
 
@@ -297,11 +302,9 @@ export default {
       }
       this.loading = true;
       let response;
-      if (this.reportName === 'fact-data') {
-        response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), app_id, this.pagination.page, this.pagination.pageSize);
-      } else {
-        response = await api.getDomainIntentQueryDetail(this.domain.toLowerCase(), this.intent.toLowerCase(), begin_date, end_date, `%${query}%`, this.pagination.page, this.pagination.pageSize);
-      }
+      
+      response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), app_id, customQuery, this.pagination.page, this.pagination.pageSize);
+      aisTool.Cookie.setData("debug_query.custom",customQuery)
       this.loading = false;
       let data = response.data;
       this.data = data.data.map((item) => ({

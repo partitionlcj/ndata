@@ -5,40 +5,40 @@
       <Col span="4" class="margin-bottom-10">
         <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
       </Col>
-      <template v-if="reportName=='fact-data'">
-        <Col span="4" class="margin-bottom-10">
-          <Input placeholder="request_id" v-model="filter.requestId" @on-enter="pageChange(1)"></Input>
-        </Col>
-        <Col span="4" class="margin-bottom-10">
-          <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
-        </Col>
-        <Col span="2" class="margin-bottom-10">
-        <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
-        </Col>
-      </template>
+      <Col span="4" class="margin-bottom-10">
+        <Input placeholder="request_id" v-model="filter.requestId" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="4" class="margin-bottom-10">
+        <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+      <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
+      </Col>
       <Col span="6" class="margin-bottom-10">
       <Input placeholder="query" v-model="filter.query" @on-enter="pageChange(1)"></Input>
       </Col>
-      <template v-if="reportName=='fact-data'">
-        <Col span="4" class="margin-bottom-10">
-        <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
+      
+      <Col span="4" class="margin-bottom-10">
+      <Input placeholder="vid" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+      <Input placeholder="appId" v-model="filter.appId" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+      <Input placeholder="domain" v-model="filter.domain" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+      <Input placeholder="operation;搜空请输入null" v-model="filter.operation" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+        <Input placeholder="intent" v-model="filter.intent" @on-enter="pageChange(1)"></Input>
+      </Col>
+        <Col span="2" class="margin-bottom-10">
+        <Input placeholder="唤醒词" v-model="filter.wakeup_asr_text" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="14" class="margin-bottom-10">
+          <Input placeholder="自定义查询，会覆盖其他条件, 示例: app_id='100240001' and env !='ds-gn-stg'" v-model="filter.customQuery" @on-enter="pageChange(1)"></Input>
         </Col>
-        <Col span="4" class="margin-bottom-10">
-        <Input placeholder="appId" v-model="filter.appId" @on-enter="pageChange(1)"></Input>
-        </Col>
-        <Col span="4" class="margin-bottom-10">
-        <Input placeholder="domain" v-model="filter.domain" @on-enter="pageChange(1)"></Input>
-        </Col>
-        <Col span="4" class="margin-bottom-10">
-        <Input placeholder="operation;搜空请输入null" v-model="filter.operation" @on-enter="pageChange(1)"></Input>
-        </Col>
-        <Col span="4" class="margin-bottom-10">
-          <Input placeholder="intent" v-model="filter.intent" @on-enter="pageChange(1)"></Input>
-        </Col>
-         <Col span="2" class="margin-bottom-10">
-          <Input placeholder="唤醒词" v-model="filter.wakeup_asr_text" @on-enter="pageChange(1)"></Input>
-        </Col>
-      </template>
       </Col>
     </Row>
     <Table :columns="columns" :data="data" :loading="loading" :row-class-name="currentViewRowCls" class="detail-table"></Table>
@@ -48,6 +48,7 @@
   </div>
 </template>
 <script>
+import aisTool from 'ais-components';
 import api from '../../api';
 import real from '../../api/real';
 import InfoModal from '../../components/Modal/InfoModal';
@@ -81,7 +82,8 @@ export default {
         intent: '',
         sessionId: '',
         requestId: '',
-        wakeup_asr_text: ''
+        wakeup_asr_text: '',
+        customQuery: ''
       },
       data: [],
       currentViewRow: -1
@@ -280,6 +282,8 @@ export default {
     //let now = '2019-06-01';
     this.filter.date = [now, now];
     this.getDomainIntentQueryDetail();
+    this.filter.customQuery = aisTool.Cookie.getData("vos_debug_query.custom")
+
   },
   methods: {
     async getDomainIntentQueryDetail(exportCsv) {
@@ -296,7 +300,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { requestId, sessionId, query, domain, operation, intent, vid, appId, env, wakeup_asr_text } = this.filter;
+      let { requestId, sessionId, query, domain, operation, intent, vid, appId, env, wakeup_asr_text, customQuery } = this.filter;
 
       operation = operation
 
@@ -307,8 +311,8 @@ export default {
       this.loading = true;
       let response;
       
-      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), appId, this.pagination.page, this.pagination.pageSize);
-    
+      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), appId, customQuery, this.pagination.page, this.pagination.pageSize);
+      aisTool.Cookie.setData("vos_debug_query.custom",customQuery)
       this.loading = false;
       let data = response.data;
       this.data = data.data.map((item) => ({

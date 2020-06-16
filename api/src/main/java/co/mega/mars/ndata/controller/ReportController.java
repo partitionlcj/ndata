@@ -236,12 +236,27 @@ public class ReportController {
 
     public JsonElement getReport(String json) throws Exception {
         logger.info("json:{}", json);
+        boolean custom = false;
         Gson g = new Gson();
         JsonObject queryParam = g.fromJson(json, JsonObject.class);
 
         String reportName = queryParam.get("report_name").getAsString();
         JsonObject reportMetaData = GsonUtil.getQueryResult(jdbcTemplate, "select * from report_meta_data where report_name=?", new Object[]{reportName}).get(0);
         JsonArray reportTitle = g.fromJson(reportMetaData.get("report_title").getAsString(), JsonArray.class);
+
+        String reportSql = reportMetaData.get("report_sql").getAsString();
+
+        String where = null;
+        if( queryParam.get("customQuery") != null){
+            String query = queryParam.get("customQuery").getAsString().trim();
+            if( query.length() > 0 ){
+                int start = reportSql.indexOf("from");
+                int end = reportSql.indexOf("where");
+                where = " "+reportSql.substring(start,end) +" where " + query;
+                custom = true;
+            }
+        }
+
         String reportParams = reportMetaData.remove("report_params").getAsString();
         JsonArray reportParamArray = reportParams.length() == 0 ? new JsonArray() : g.fromJson(reportParams, JsonArray.class);
 
@@ -254,19 +269,26 @@ public class ReportController {
 
             params[index - 1] = value;
         }
+        if( custom){
+            params = new Object[0];
+        }
         logger.info("params:{}", Arrays.toString(params));
 
-        String reportSql = reportMetaData.get("report_sql").getAsString();
+        if( custom ){
+            reportSql = reportSql.substring(0, reportSql.indexOf("from")) + where;
+        }
+
+        where =  reportSql.substring(reportSql.indexOf("from"));
 
         int total = 0;
         if (GsonUtil.getAsInt(queryParam, "pageIndex", 0) == 0 && GsonUtil.getAsInt(queryParam, "pageSize", 0) == 0) {
             total = 1;
         }
-        else if (params.length == 0) {
-            total = jdbcTemplate.queryForObject("select count(*) " + reportSql.substring(reportSql.indexOf("from")), Integer.class);
+        else if (params.length == 0 || custom) {
+            total = jdbcTemplate.queryForObject("select count(*) " + where, Integer.class);
         }
         else
-            total = jdbcTemplate.queryForObject("select count(*) " + reportSql.substring(reportSql.indexOf("from")), params, Integer.class);
+            total = jdbcTemplate.queryForObject("select count(*) " + where, params, Integer.class);
 
         if (total == 0) {
             return getReportResult(total, reportTitle, new JsonArray());
