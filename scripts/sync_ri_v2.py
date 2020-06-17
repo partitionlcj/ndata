@@ -28,7 +28,7 @@ class HuDataTracking(object):
         self.nlu_type = -1
         self.multi_round = 0
         self.city = ''
-        self.address = ''
+        self.province= ''
         self.request_trigger_by = 0
         self.use_response = 0
         self.awaken_type = 0
@@ -183,27 +183,30 @@ class HuDataTracking(object):
 
         l = ss.get('location', None)
         self.city = ss.get('curCity', '')
+        self.province = ss.get('province', '')
 
         if l:
             if 'curCity' in l :
                 self.city = l.get('curCity', '')
+                self.province = l.get('province', '')
             else:
                 ll = l.split(",")
                 ct = city.get_city(float(ll[0]),float(ll[1]))
-                if self.city != '' and self.city != ct:
+                if self.city != '' and self.city != ct.get('name'):
                     print(f"{self.city} != {ct}, l={l}")
-                self.city = ct
+                self.city = ct.get('name')
+                self.province = ct.get('province')
 
         self.save_db()
 
     def save_db(self):
         with db.cursor() as c:
             c.execute(
-                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,address,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
+                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)",
                 (self.request_id, self.vehicle_id, self.session_id, self.user_id, self.query, self.nlu_type,
                  self.final_tts, self.final_view_text, self.ts, self.domain, self.intents, self.multi_round, self.env,
-                 self.city, self.address, self.request_trigger_by, self.use_response, self.awaken_type,
+                 self.city, self.province, self.request_trigger_by, self.use_response, self.awaken_type,
                  self.sound_location, self.state, self.operations, self.catemr, self.cst_id, self.client_version,
                  self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id))
             db.commit()
@@ -280,14 +283,20 @@ def asr_pipeline():
     wav_num = 0
 
     with db_ri.cursor() as c1:
-        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and env not like %s and env not like %s",(ts,ts_end,'%int%','%dev%'))
+        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
         rs1 = c1.fetchall()
 
         for r1 in rs1:
             rid = r1.get('id')
+            app_id = r1.get('app_id')
             env = r1.get('env')
             ts2 = r1.get('timestamp')
+            env = r1.get('env')
 
+            if env.find('dev') >=0 or env.find("int") > 0:
+                if app_id != '100990130':
+                    continue
+            
             provider = 'aws'
             if env.find('ds-gn') >= 0:
                 provider = 'hw'
@@ -299,10 +308,11 @@ def asr_pipeline():
 
         print(f"{wav_num} asr wav imported.")
 
-
-
-
 def audio_dump(rid, ts, provider='aws'):
+    if conn['ssdb'].get(rid) != None:
+        print('skip')
+        return
+
     dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
     bucket = BUCKET_NAME
 

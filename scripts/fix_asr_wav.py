@@ -280,14 +280,19 @@ def asr_pipeline():
     wav_num = 0
 
     with db_ri.cursor() as c1:
-        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and env not like %s and env not like %s",(ts,ts_end,'%int%','%dev%'))        
+        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and app_id=%s",(ts,ts_end,'100990130'))        
         rs1 = c1.fetchall()
 
         for r1 in rs1:
             rid = r1.get('id')
+            app_id = r1.get('app_id')
             env = r1.get('env')
             ts2 = r1.get('timestamp')
 
+            if env.find('dev') >=0 or env.find("int") > 0:
+                if app_id != '100990130':
+                    continue
+            
             provider = 'aws'
             if env.find('ds-gn') >= 0:
                 provider = 'hw'
@@ -304,6 +309,11 @@ def asr_pipeline():
 
 def audio_dump(rid, ts, provider='aws'):
     dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
+    KEY = 'audio_data/'+ dt +'/' + rid
+
+    if conn['ssdb'].get(rid) != None:
+        print('skip')
+        return
     bucket = BUCKET_NAME
 
     if provider == 'hw':
@@ -318,7 +328,6 @@ def audio_dump(rid, ts, provider='aws'):
     else:
         s3 = boto3.resource('s3')
     
-    KEY = 'audio_data/'+ dt +'/' + rid
 
     try:
         print(KEY)
