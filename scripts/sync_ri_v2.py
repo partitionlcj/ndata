@@ -233,11 +233,11 @@ def get_exist_rids(c,ts):
 3. 获取实车vid和激活ts
 4. 获取request_info起始时间开始的数据，对每条数据检查vid和ts，分析是否是有效数据；
 '''
-def pipeline():
+def pipeline(hour):
     total_query = 0
     insert_query = 0
 
-    back_time = 7*24*60*60*1000
+    back_time = hour*60*60*1000
 
     ts_end = int(time.time()*1000) 
     ts = ts_end - back_time
@@ -274,8 +274,8 @@ def pipeline():
 
         print(f"total {total_query} queries, insert {insert_query} queries")
 
-def asr_pipeline():
-    back_time = 1*60*60*1000
+def asr_pipeline(hour):
+    back_time = hour*60*60*1000
 
     ts_end = int(time.time()*1000) 
     ts = ts_end - back_time
@@ -368,7 +368,8 @@ if __name__ == '__main__':
     init()
     db = conn['db']
     db_ri = conn['db_ri']
-    asr_pipeline()
-    pipeline()
+    hour = int(sys.argv[1])
+    asr_pipeline(hour)
+    pipeline(hour)
     
     

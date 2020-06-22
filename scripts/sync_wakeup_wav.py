@@ -12,11 +12,11 @@ BUCKET_NAME = 'ais-storage'
 
 rids=set()
 
-def pipeline():
+def pipeline(hour):
     total_query = 0
     insert_query = 0
 
-    ts = int(time.time()*1000) - 3*60*60*1000
+    ts = int(time.time()*1000) - hour*60*60*1000
 
     with conn['db_ri'].cursor() as c1, conn['db'].cursor() as c2:
         c1.execute("select * from wakeup_info where `timestamp` >= %s", ts)
@@ -112,7 +112,7 @@ def save2ssdb(rid):
     
 
 if __name__ == '__main__':
+    hour = int(sys.argv[1])
     init()
-    pipeline()
-    
+    pipeline(hour)
     
