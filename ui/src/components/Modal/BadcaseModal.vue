@@ -46,7 +46,7 @@ export default {
         {id: 1003, label:'外语'},
         {id: 1004, label:'语速快'},
         {id: 1005, label:'语速慢'},
-        {id: 1006, label:'其他'},
+        {id: 1006, label:'童声'},
         {id: 2001, label:'poi纠错'},
         {id: 2002, label:'新发音'},
         {id: 2003, label:'新词'},
