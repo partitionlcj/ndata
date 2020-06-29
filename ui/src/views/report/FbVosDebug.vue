@@ -282,7 +282,10 @@ export default {
     //let now = '2019-06-01';
     this.filter.date = [now, now];
     this.getDomainIntentQueryDetail();
-    this.filter.customQuery = aisTool.Cookie.getData("vos_debug_query.custom")
+    this.filter.customQuery = aisTool.Cookie.getData("vos_debug_query.custom") + ""
+    if( this.filter.customQuery == "undefined" ){
+      this.filter.customQuery = ""
+    }
 
   },
   methods: {

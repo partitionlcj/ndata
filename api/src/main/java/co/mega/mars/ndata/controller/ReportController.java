@@ -5,6 +5,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +29,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -111,6 +120,54 @@ public class ReportController {
         }
         ssdb.close();
         return new ResponseEntity<Object>(RestResult.getSuccessResult(data), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/common/badcase")
+    public ResponseEntity  addBadCase(@RequestBody String json) throws Exception {
+        Gson g = new Gson();
+        JsonObject p = g.fromJson(json, JsonObject.class);
+        String rid = p.get("request_id").getAsString();
+
+        try(CloseableHttpClient client = HttpClients.createDefault()){
+            String url = String.format("http://marsops.i-tetris.com:9890/api/nlu/asr/badcase");
+            HttpPost httpPost = new HttpPost(url);
+            StringEntity entity = new StringEntity(json,"utf-8");
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            httpPost.setHeader("Cookie", "mars_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJubHVfYXBwIiwidWlkIjoxMDAwLCJvcmciOiJtZWdhIiwiaWF0IjoxNTkzNDAxNTY3LCJleHAiOjE2MjQ5Mzc1Njd9.Jb2HcRys719D6UuY0R2Sgl7XYQy3fZRrfp-cgjU7sX0");
+
+            CloseableHttpResponse response = client.execute(httpPost);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                jdbcTemplate.update("update debug_query set badcase=1 where request_id=?", new Object[]{rid});
+                return new ResponseEntity<Object>(RestResult.getSuccessResult(p), HttpStatus.OK);
+
+            } else {
+                return new ResponseEntity<Object>(RestResult.getFailResult("failed to add badcase,"+response.getEntity().toString(),p), HttpStatus.OK);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        try(CloseableHttpClient client = HttpClients.createDefault()){
+            String url = String.format("http://marsops.i-tetris.com:9890/api/nlu/asr/badcase");
+            HttpPost httpPost = new HttpPost(url);
+            StringEntity entity = new StringEntity("{'request_id':'aaa','text':'test','asr_text':'test_asr','type':1000,'weight':1}");
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            httpPost.setHeader("", "mars_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJubHVfYXBwIiwidWlkIjoxMDAwLCJvcmciOiJtZWdhIiwiaWF0IjoxNTkzNDAxNTY3LCJleHAiOjE2MjQ5Mzc1Njd9.Jb2HcRys719D6UuY0R2Sgl7XYQy3fZRrfp-cgjU7sX0");
+
+            CloseableHttpResponse response = client.execute(httpPost);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                System.out.println("success");
+            } else {
+                System.out.println("failed:"+response.getEntity().toString());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @PostMapping("/api/common/read_page_ssdb")
@@ -249,7 +306,7 @@ public class ReportController {
         String where = null;
         if( queryParam.get("customQuery") != null){
             String query = queryParam.get("customQuery").getAsString().trim();
-            if( query.length() > 0 ){
+            if( query.length() > 0 && ! "undefined".equals(query) ){
                 int start = reportSql.indexOf("from");
                 int end = reportSql.indexOf("where");
                 where = " "+reportSql.substring(start,end) +" where " + query;

@@ -1,6 +1,7 @@
 <template>
   <div>
     <InfoModal v-model="showModal" :data="sysResult"></InfoModal>
+    <BadcaseModal v-model="showBadcaseModal" :data="currentRow" @updateBadcase="updateBadcase"></BadcaseModal>
     <Row class="margin-bottom-20" :gutter="16">
       <Col span="4" class="margin-bottom-10">
         <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
@@ -55,19 +56,23 @@ import aisTool from 'ais-components';
 import api from '../../api';
 import real from '../../api/real';
 import InfoModal from '../../components/Modal/InfoModal';
+import BadcaseModal from '../../components/Modal/BadcaseModal';
 import util from '../../util';
 export default {
   components: {
-    InfoModal
+    InfoModal,
+    BadcaseModal
   },
   data() {
     return {
       currentSessionId: '',
+      currentRow: null,
       reportName: '',
       domain: '',
       intent: '',
       loading: false,
       showModal: false,
+      showBadcaseModal: false,
       sysResult: '',
       pagination: {
         page: 1,
@@ -188,7 +193,6 @@ export default {
           title: '唤醒',
           width: 90,
           render: (h, params) => {
-            console.log(params.row)
             if( params.row.wakeup === 1){
               return h('AisAudio', {
                 props: {
@@ -237,6 +241,32 @@ export default {
           }
         })
         columns.push({
+          title: 'badcase',
+          width: 100,
+          align: 'center',
+          key: 'detail',
+          render: (h, params) => {
+            if( params.row.badcase === 0){
+              return h('Button', {
+                props: {
+                  type: 'warning',
+                  size: 'small'
+                },
+                on: {
+                  click: () => {
+                    this.currentViewRow = params.row._index;
+                    this.currentRow = params.row;
+                    this.badcase(params.row);
+                  }
+                }
+              }, 'badcase');
+            }
+            else{
+              return h('div', "已提交")
+            }
+          }
+        })
+        columns.push({
           title: 'ReqInfo',
           width: 100,
           align: 'center',
@@ -244,7 +274,7 @@ export default {
           render: (h, params) => {
             return h('Button', {
               props: {
-                type: 'primary',
+                type: 'success',
                 size: 'small'
               },
               on: {
@@ -274,7 +304,10 @@ export default {
     let now = util.getTodayDate();
     //let now = '2019-06-01';
     this.filter.date = [now, now];
-    this.filter.customQuery = aisTool.Cookie.getData("debug_query.custom")
+    this.filter.customQuery = aisTool.Cookie.getData("debug_query.custom") + ""
+    if( this.filter.customQuery == "undefined" ){
+      this.filter.customQuery = ""
+    }
     this.getDomainIntentQueryDetail();
   },
   methods: {
@@ -321,6 +354,7 @@ export default {
         wakeup: item[11],
         wakeup_asr_text: item[12],
         app_id: item[13],
+        badcase: item[14],
         hasSubmited: false
       }));
       this.pagination.total = data.total;
@@ -335,9 +369,16 @@ export default {
       let response = await api.getRequestInfo(requestId);
       if (response.state === 'success') {
         this.sysResult = response.data;
-        console.log(this.sysResult)
         this.showModal = true;
       }
+    },
+    badcase(params) {
+      this.currentRow = params
+      this.showBadcaseModal = true;
+    },
+    updateBadcase(){
+      this.currentRow.badcase = 1
+      this.showBadcaseModal = false;
     },
     dateChange(val) {
       this.filter.date = val;
