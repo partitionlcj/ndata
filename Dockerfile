@@ -26,6 +26,7 @@ RUN yum -y install vim
 RUN yum -y install mysql
 RUN yum -y install python3
 RUN yum -y install python3-pip
+RUN yum -y install tmux
 
 RUN python3 -m pip install --upgrade pip && \
     pip3 install --no-cache-dir pymysql boto3 wave pyssdb
