@@ -29,6 +29,14 @@ def get_yly():
             data[r.get('text')] = "YLY_"+str(r.get('id')).zfill(6)
     return data
 
+def date_count_nv(c,sql,date_count):
+    c.execute(sql,date_count)
+    rs = c.fetchall()
+    l = []
+    for r in rs:
+        l.append({'name':str(r.get('ts')), 'value': r.get('c')})
+    return l
+
 def get_yly_map():
     data = {}
     with conn['db_ops'].cursor() as c:
@@ -119,4 +127,3 @@ def date_count(c,sql,date_count):
 def get_count(c,sql,pp):
     c.execute(sql, pp)
     return c.fetchone().get('c')
-
