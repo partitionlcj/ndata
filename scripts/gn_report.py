@@ -8,7 +8,7 @@ env='ds-mars-prod'
 
 def hot_domains(c,date_range,key):
     domain_count = date_count(c, f"select domain as ts,count(1) as c from debug_query where  date(ts)>=%s and date(ts)<=%s and catemr='task' group by domain order by c desc",date_range)
-    ssdb_save_json(f'{env}.domain.' + key, domain_count)
+    ssdb_save_json(f'{env}.base.domain.' + key, domain_count)
     huashu_count = date_count(c,f"select catemr as ts,count(1) as c from debug_query where  date(ts)>=%s and date(ts)<=%s group by catemr order by c desc",date_range)
     ssdb_save_json(f'{env}.base.huashu.'+key,huashu_count)
 
@@ -73,15 +73,6 @@ def total_domain_intents_dist(c):
 def snapshot_report(c,k):
     total_domain_intents_dist(c)
 
-def query_frequency(c,dr,key):
-    c.execute(f"select query as q,count(1) as c from debug_query where env='{env}' and date(ts)>=%s and date(ts)<=%s and length(query)>0 group by query order by c desc limit 200",dr)
-    rs = c.fetchall()
-    o = []
-    for r in rs:
-        o.append({'query':r.get('q'),'count':r.get('c')})
-
-    ssdb_save_json(f"{env}.query.frequency.{key}",o)
-
 def city_query(c,dr, key):
     cq = date_count(c,f"select city as ts,count(request_id) as c from debug_query where  date(ts)>=%s and date(ts)<=%s group by city",dr)
     cv = date_count(c,f"select city as ts,count(distinct(vehicle_id)) as c from debug_query where  date(ts)>=%s and date(ts)<=%s group by city",dr)
@@ -93,6 +84,16 @@ def city_query(c,dr, key):
 
     ssdb_save_json(f"{env}.base.city.{key}", data)
 
+
+def query_frequency(c,dr,key):
+    c.execute(f"select query as q,count(1) as c from debug_query where env='ds-gn-prod' and date(ts)>=%s and date(ts)<=%s and length(query)>0 and query != 'N/A'  group by query order by c desc limit 200",dr)
+    rs = c.fetchall()
+    o = []
+    for r in rs:
+        o.append({'query':r.get('q'),'count':r.get('c')})
+
+    ssdb_save_json(f"{env}.query.frequency.{key}",o)
+
 def period_report(c, dr, k,detail_info=False):
     hot_domains(c, dr, k)
     hot_intents(c, dr, k)
@@ -100,9 +101,7 @@ def period_report(c, dr, k,detail_info=False):
     nlu_type_data(c, dr, k)
     basic_usage(c, dr, k)
     hour_distrib(c, dr, k)
-    # nav_path(c, dr, k, env, detail_info=detail_info)
-    # call_path(c, dr, k, env, detail_info=detail_info)
-    query_frequency(c,dr,k)
+    query_frequency(c, dr, k)
     city_query(c,dr,k)
 
 def nomi_usage_vids(c,dr,key):
@@ -178,14 +177,16 @@ def gen_all_report(c):
 
 def today(c):
     today = date.today()
-    yesterday = today - timedelta(days=1)
     daily_report(c, today.strftime('%Y-%m-%d'))
-    daily_report(c, yesterday.strftime('%Y-%m-%d'))
-    for i in range(0,2):
+    for i in range(0,5):
+        yesterday = today - timedelta(days=i)
+        daily_report(c, yesterday.strftime('%Y-%m-%d'))
+    for i in range(0,3):
         monday = today - timedelta(days=(today.weekday() + i*7))
         weekly_report(c,monday)
-    monthly_report(c, 2019, today.month)
-    monthly_report(c, 2019, today.month-1)
+    monthly_report(c, 2020, today.month)
+    monthly_report(c, 2020, today.month-1)
+    monthly_report(c, 2020, today.month-2)
 
     snapshot_report(c, 'd.' + yesterday.strftime('%Y%m%d'))
 

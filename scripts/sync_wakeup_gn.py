@@ -1,12 +1,11 @@
 import sys, json, datetime, os
 import pymysql
-from config import *
+from config_gn import *
 import city
 import time
 import boto3
 import botocore
 import wave
-from db_gn import *
 from subprocess import call,Popen,PIPE
 
 rids=set()
@@ -15,7 +14,7 @@ def pipeline():
     total_query = 0
     insert_query = 0
 
-    ts = int(time.time()*1000) - 3*60*60*1000
+    ts = int(time.time()*1000) - 1*60*60*1000
 
     with conn['db_ri'].cursor() as c1, conn['db'].cursor() as c2:
         c1.execute("select * from wakeup_info where `timestamp` >= %s", ts)
@@ -25,7 +24,7 @@ def pipeline():
             asr_text = r.get('asr_text')
             if asr_text != None:
                 asr_text = asr_text.upper()
-            wd = ssdb_get('WAKEUP_'+rid) 
+            wd = ssdb_get('WAKEUP_'+rid)
             if wd == None or len(wd) == 0:
                 if download_wav(rid,r.get('timestamp'),r.get('env')):
                     c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
@@ -38,7 +37,6 @@ def pipeline():
                     wat = rs.get('wakeup_asr_text')
                     if wat == None or len(wat) == 0 :
                         c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
-                        c2.execute('update vos_debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
                         conn['db'].commit()
                         print("[fix] sync ri status " + rid)
 
@@ -80,14 +78,14 @@ def audio_dump(rid, ts, provider='aws'):
             raise
 
 def pcm2wav(rid):
-    fn = 'WAKEUP_' + rid 
+    fn = 'WAKEUP_' + rid
     p = Popen(["./SpeexToPcm",fn+'.pcm', fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata')
     output, err = p.communicate("")
     print(output)
     print(err)
 
 def save2ssdb(rid):
-    fn = 'WAKEUP_' + rid 
+    fn = 'WAKEUP_' + rid
     with open( fn + '.wav', 'rb') as wavfile:
         data = wavfile.read()
         ssdb_save(fn,data)
@@ -95,10 +93,8 @@ def save2ssdb(rid):
             print(f"{rid} only has wakup wav.")
     #os.remove(fn+'.pcm')
     os.remove(fn+".wav")
-    
+
 
 if __name__ == '__main__':
     init()
     pipeline()
-    
-    
