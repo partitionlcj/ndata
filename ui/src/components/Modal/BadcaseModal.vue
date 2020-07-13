@@ -19,6 +19,10 @@
       <FormItem label="权重">
         <InputNumber :min="1" :max="100" v-model="p.weight" placeholder="请输入权重"></InputNumber>
       </FormItem>
+      <FormItem label="低质音频">
+        <Button @click="lowQuality('cut')">截断</Button>
+        <Button @click="lowQuality('other')">其他</Button>
+      </FormItem>
       </Form>
     </Modal>
   </div>
@@ -69,6 +73,16 @@ export default {
   methods: {
     visibleChange(status) {
       this.$emit('input', status);
+    },
+    async lowQuality(type){
+      let response = await api.submitLowQualityWav(this.p,type);
+      if (response.state === 'success') {
+        //this.$Message.success('提交成功');
+        this.$emit('updateBadcase');
+        //this.$emit('input', false);
+      } else {
+        this.$Message.error(response.data);
+      }
     },
     async addBadcase() {
       if (this.p.text === '') {

@@ -122,6 +122,24 @@ public class ReportController {
         return new ResponseEntity<Object>(RestResult.getSuccessResult(data), HttpStatus.OK);
     }
 
+    @PostMapping("/api/common/lowQuality")
+    public ResponseEntity  markLowQuality(@RequestBody String json) throws Exception {
+        Gson g = new Gson();
+        JsonObject p = g.fromJson(json, JsonObject.class);
+        String rid = p.get("request_id").getAsString();
+        String type = p.get("type").getAsString();
+        int lowQualityType = -1;
+        if( "cut".equals(type)){
+            lowQualityType = 1001;
+        }
+        else {
+            lowQualityType = 9999;
+        }
+        jdbcTemplate.update("update debug_query set badcase=? where request_id=?", new Object[]{lowQualityType,rid});
+        logger.info("set low quality wav {} {}", rid, type);
+        return new ResponseEntity<Object>(RestResult.getSuccessResult(p), HttpStatus.OK);
+    }
+
     @PostMapping("/api/common/badcase")
     public ResponseEntity  addBadCase(@RequestBody String json) throws Exception {
         Gson g = new Gson();

@@ -262,7 +262,14 @@ export default {
               }, 'badcase');
             }
             else{
-              return h('div', "已提交")
+              let msg = '已提交'
+              if( params.row.badcase === 1001 ){
+                msg = '音频截断'
+              }
+              if( params.row.badcase === 9999 ){
+                msg = '低质音频'
+              }
+              return h('div', msg)
             }
           }
         })
