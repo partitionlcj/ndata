@@ -17,7 +17,10 @@
         </Select>
       </FormItem>
       <FormItem label="权重">
-        <InputNumber :min="1" :max="100" v-model="p.weight" placeholder="请输入权重"></InputNumber>
+        <InputNumber :min="1" :max="100" v-model="p.weight" placeholder="在线模型权重"></InputNumber>
+      </FormItem>
+      <FormItem label="离线权重">
+        <InputNumber :min="1" :max="100" v-model="p.offline_weight" placeholder="离线模型权重"></InputNumber>
       </FormItem>
       <FormItem label="低质音频">
         <Button @click="lowQuality('cut')">截断</Button>
@@ -42,7 +45,8 @@ export default {
         asr_text: '',
         text: '',
         type: 0,
-        weight: 1
+        weight: 1,
+        offline_weight: 0
       },
       types: [
         {id: 1001, label:'噪音'},
