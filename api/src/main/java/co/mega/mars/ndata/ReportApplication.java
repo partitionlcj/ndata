@@ -1,6 +1,8 @@
 package co.mega.mars.ndata;
 
 import org.apache.tomcat.util.http.LegacyCookieProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +21,8 @@ import redis.clients.jedis.JedisPool;
 @SpringBootApplication
 public class ReportApplication {
 
+	Logger logger = LoggerFactory.getLogger(ReportApplication.class);
+
 	@Value("${ssdb.main.host}")
 	String ssdbHost;
 	@Value("${ssdb.main.port}")
@@ -36,6 +40,13 @@ public class ReportApplication {
 	@Bean("mainSSDB")
 	public JedisPool getMainPool(){
 		return new JedisPool(ssdbHost,ssdbPort);
+	}
+
+	@Bean
+	public WebServerFactoryCustomizer<TomcatServletWebServerFactory> cookieProcessorCustomizer() {
+		logger.info("Use LegacyCookieProcessor.");
+		return (factory) -> factory.addContextCustomizers(
+				(context) -> context.setCookieProcessor(new LegacyCookieProcessor()));
 	}
 
 	public static void main(String[] args) {
