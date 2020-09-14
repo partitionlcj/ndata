@@ -13,8 +13,7 @@ BUCKET_NAME = 'ais-storage'
 rids=set()
 
 def pipeline(hour):
-    total_query = 0
-    insert_query = 0
+    cnt = 0
 
     ts = int(time.time()*1000) - hour*60*60*1000
 
@@ -23,28 +22,13 @@ def pipeline(hour):
         rs = c1.fetchall()
         for r in rs:
             rid = r.get('id')
-            asr_text = r.get('asr_text')
-            if asr_text != None:
-                asr_text = asr_text.upper()
+            
             wd = ssdb_get('WAKEUP_'+rid) 
             if wd == None or len(wd) == 0:
                 if download_wav(rid,r.get('timestamp'),r.get('env')):
-                    c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
-                    conn['db'].commit()
-                    print("sync ri status " + rid)
-            else:
-                c2.execute('select wakeup_asr_text from debug_query where request_id=%s',rid)
-                rs = c2.fetchone()
-                if rs != None:
-                    wat = rs.get('wakeup_asr_text')
-                    if wat == None or len(wat) == 0 :
-                        c2.execute('update debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
-                        c2.execute('update vos_debug_query set wakeup=1,wakeup_asr_text=%s where request_id=%s',[asr_text,rid])
-                        conn['db'].commit()
-                        print("[fix] sync ri status " + rid)
-
-            rids.add(rid)
-    print(f"total {len(rids)} wakeup info processed.")
+                    cnt = cnt + 1
+                    print("download wakeup wav " + rid)
+    print(f"total {cnt} wakeup info processed.")
 
 def download_wav(rid,ts,env):
     provider = 'aws'
@@ -52,7 +36,6 @@ def download_wav(rid,ts,env):
         provider = 'hw'
 
     if audio_dump(rid,ts,provider):
-        #pcm2wav(rid)
         save2ssdb(rid)
         return True
     else:
@@ -92,14 +75,6 @@ def pcm2wav(rid):
     print(output)
     print(err)
 
-def pcm2wav1(rid):
-    fn = 'WAKEUP_' + rid
-    with open(fn, 'rb') as pcmfile:
-        pcmdata = pcmfile.read()
-    with wave.open( fn + '.wav', 'wb') as wavfile:
-        wavfile.setparams((1, 2, 16000, 0, 'NONE', 'NONE'))
-        wavfile.writeframes(pcmdata)
-
 def save2ssdb(rid):
     fn = 'WAKEUP_' + rid 
     with open( fn + '.wav', 'rb') as wavfile:
@@ -107,10 +82,8 @@ def save2ssdb(rid):
         ssdb_save(fn,data)
         if ssdb_get(rid) == None:
             print(f"{rid} only has wakup wav.")
-    #os.remove(fn+'.pcm')
     os.remove(fn+".wav")
     
-
 if __name__ == '__main__':
     hour = int(sys.argv[1])
     init()

@@ -31,7 +31,6 @@ class HuDataTracking(object):
         self.province= ''
         self.request_trigger_by = 0
         self.use_response = 0
-        self.awaken_type = 0
         self.sound_location = ''
         self.state = -1
         self.operations = ''
@@ -149,9 +148,9 @@ class HuDataTracking(object):
             intents = ''
             for i in r['intentList']:
                 if len(intents) == 0:
-                    intents = i['type']
+                    intents = i.get('type','')
                 else:
-                    intents = intents + ',' + i['type']
+                    intents = intents + ',' + i.get('type','')
             self.intents = intents
         else:
             self.intents = ''
@@ -202,11 +201,11 @@ class HuDataTracking(object):
     def save_db(self):
         with db.cursor() as c:
             c.execute(
-                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)",
+                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)",
                 (self.request_id, self.vehicle_id, self.session_id, self.user_id, self.query, self.nlu_type,
                  self.final_tts, self.final_view_text, self.ts, self.domain, self.intents, self.multi_round, self.env,
-                 self.city, self.province, self.request_trigger_by, self.use_response, self.awaken_type,
+                 self.city, self.province, self.request_trigger_by, self.use_response, 
                  self.sound_location, self.state, self.operations, self.catemr, self.cst_id, self.client_version,
                  self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id))
             db.commit()

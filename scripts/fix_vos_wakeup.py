@@ -14,7 +14,6 @@ class VosReqInfo:
   oneshot: bool = False
   car_type: str = ''
   query: str = ''
-  vossdk_ver: str = ''
   tts: str = ''
   view_text: str = ''
   use_cloud_response: bool = False
@@ -30,12 +29,9 @@ class VosReqInfo:
   app_id:str = ''
 
   def to_sql_params(self) -> tuple:
-    return (self.request_id,  self.session_id, self.vehicle_id, self.env, self.oneshot, self.car_type, self.query, self.tts, self.view_text, self.use_cloud_response, self.operations, self.start_time, self.end_time, self.duration, self.update_time, self.domain, self.intents, self.wakeup, self.wakeup_asr_text,self.app_id, self.city, self.province, self.vossdk_ver)
+    return (self.request_id,  self.session_id, self.vehicle_id, self.env, self.oneshot, self.car_type, self.query, self.tts, self.view_text, self.use_cloud_response, self.operations, self.start_time, self.end_time, self.duration, self.update_time, self.domain, self.intents, self.wakeup, self.wakeup_asr_text,self.app_id, self.city, self.province)
 
 def parse(o, vri):
-  ver = o.get('versions')
-  if ver != None:
-    vri.vossdk_ver = ver.get('vossdk','N/A')
   asrNluRequestHeader = o.get('asrNluRequestHeader')
   if asrNluRequestHeader != None:
     vri.request_id = asrNluRequestHeader.get("id","")
@@ -80,7 +76,7 @@ def test():
     print(vri)
 
 def get_exists_rids(c,ts):
-  c.execute("select request_id from sariel.vos_debug_query where `update_time`>= FROM_UNIXTIME(%s)", (ts / 1000 - 1000))
+  c.execute("select request_id from sariel.vos_debug_query where `update_time`>= FROM_UNIXTIME(%s) and wakeup=1", (ts / 1000 - 1000))
   rs = c.fetchall()
 
   pnq_ids = set()
@@ -150,7 +146,7 @@ def vos_ri(hour):
         if len( vri.query ) > 768:
             print("query too long: " + rid + " - " + str(vri.query))
             continue
-        c.execute("REPLACE INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`,domain,intents,wakeup,wakeup_asr_text,app_id,city,province,vossdk_ver) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s,%s, %s, %s,%s,%s,%s, %s)",vri.to_sql_params() )
+        c.execute("REPLACE INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`,domain,intents,wakeup,wakeup_asr_text,app_id,city,province) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s,%s, %s, %s,%s,%s,%s)",vri.to_sql_params() )
   db.commit()
   print("vos di complete")
 
