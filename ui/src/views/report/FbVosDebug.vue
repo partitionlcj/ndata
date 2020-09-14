@@ -5,11 +5,14 @@
       <Col span="4" class="margin-bottom-10">
         <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
       </Col>
-      <Col span="4" class="margin-bottom-10">
+      <Col span="3" class="margin-bottom-10">
         <Input placeholder="request_id" v-model="filter.requestId" @on-enter="pageChange(1)"></Input>
       </Col>
-      <Col span="4" class="margin-bottom-10">
+      <Col span="2" class="margin-bottom-10">
         <Input placeholder="session_id" v-model="filter.sessionId" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="3" class="margin-bottom-10">
+        <Input placeholder="vossdk_ver" v-model="filter.vossdk_ver" @on-enter="pageChange(1)"></Input>
       </Col>
       <Col span="2" class="margin-bottom-10">
       <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
@@ -82,6 +85,7 @@ export default {
         intent: '',
         sessionId: '',
         requestId: '',
+        vossdk_ver: '',
         wakeup_asr_text: '',
         customQuery: ''
       },
@@ -164,7 +168,12 @@ export default {
           title: 'intent',
           key: 'intent',
           minWidth: 100
-        }, {
+        }, 
+        {
+          title: 'vossdk_ver',
+          key: 'vossdk_ver',
+          minWidth: 100
+        },{
           title: 'env',
           key: 'env',
           minWidth: 80
@@ -303,7 +312,7 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { requestId, sessionId, query, domain, operation, intent, vid, appId, env, wakeup_asr_text, customQuery } = this.filter;
+      let { requestId, sessionId, query, domain, operation, intent, vid, appId, env, vossdk_ver, wakeup_asr_text, customQuery } = this.filter;
 
       operation = operation
 
@@ -314,7 +323,7 @@ export default {
       this.loading = true;
       let response;
       
-      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), appId, customQuery, this.pagination.page, this.pagination.pageSize);
+      response = await api.getVosDebugData(begin_date, end_date, requestId.toLowerCase().trim(), sessionId.toLowerCase().trim(), query.toLowerCase().trim(), domain.toLowerCase().trim(), vid.toLowerCase().trim(), operation.toLowerCase().trim(), intent.toLowerCase().trim(), env.toLowerCase().trim(), wakeup_asr_text.toUpperCase().trim(), appId.trim(), vossdk_ver.toLowerCase().trim(), customQuery, this.pagination.page, this.pagination.pageSize);
       aisTool.Cookie.setData("vos_debug_query.custom",customQuery)
       this.loading = false;
       let data = response.data;
@@ -332,6 +341,7 @@ export default {
         wakeup: item[11],
         wakeup_asr_text: item[12],
         app_id:item[13],
+        vossdk_ver:item[14],
         hasSubmited: false
       }));
       this.pagination.total = data.total;

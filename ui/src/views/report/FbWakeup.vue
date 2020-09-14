@@ -6,7 +6,7 @@
         <DatePicker :value="filter.date" format="yyyy-MM-dd" type="daterange" placement="bottom-end" placeholder="Select date" @on-change="dateChange" style="width: 100%"></DatePicker>
       </Col>
       <template>
-        <Col span="5" class="margin-bottom-10">
+        <Col span="3" class="margin-bottom-10">
           <Input placeholder="vehicle_id" v-model="filter.vid" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="2" class="margin-bottom-10">
@@ -16,8 +16,14 @@
       <Col span="3" class="margin-bottom-10">
       <Input placeholder="app_id" v-model="filter.app_id" @on-enter="pageChange(1)"></Input>
       </Col>
+      <Col span="5" class="margin-bottom-10">
+        <Input placeholder="request_id" v-model="filter.rid" @on-enter="pageChange(1)"></Input>
+      </Col>
       <Col span="4" class="margin-bottom-10">
-        <Input placeholder="event_type" v-model="filter.event_type" @on-enter="pageChange(1)"></Input>
+        <Input placeholder="vossdk version" v-model="filter.ver" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="3" class="margin-bottom-10">
+        <Input placeholder="asr text" v-model="filter.asr_text" @on-enter="pageChange(1)"></Input>
       </Col>
     </Row>
     <Table :columns="columns" :data="data" :loading="loading" :row-class-name="currentViewRowCls" class="detail-table"></Table>
@@ -49,10 +55,12 @@ export default {
       },
       filter: {
         date: [],
-        event_type: '',
+        rid: '',
         env: '',
         vid: '',
-        app_id: ''
+        app_id: '',
+        ver: '',
+        asr_text: ''
       },
       data: [],
       currentViewRow: -1
@@ -68,7 +76,12 @@ export default {
   computed: {
     columns() {
       let columns = []
-    
+      columns.push({
+        title: 'request_id',
+        minWidth: 340,
+        maxWidth: 340,
+        key: 'request_id',
+      });
       columns.push({
         title: 'vid',
         key: 'vid',
@@ -81,12 +94,17 @@ export default {
           }, params.row.vid.slice(params.row.vid.length - 5));
         }
       });
-
+      columns.push( {
+          title: '唤醒词',
+          key: 'asr_text',
+          width: 150
+        }
+      )
       columns.push( {
           title: 'env',
           key: 'env',
-          minWidth: 110,
-          maxWidth: 110,
+          minWidth: 150,
+          maxWidth: 150,
         })
       
       columns.push({
@@ -95,45 +113,50 @@ export default {
         minWidth: 110,
         maxWidth: 110
       });
+
+      columns.push( {
+          title: 'ver',
+          key: 'ver',
+          minWidth: 410,
+          maxWidth: 410,
+        }
+      )
+
+      columns.push({
+          title: '音频',
+          width: 70,
+          render: (h, params) => {
+            return h('AisAudio', {
+              props: {
+                url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
+                size: 14
+              }
+            })
+          }
+        })
       columns.push({
         title: 'date',
         key: 'date',
         minWidth: 190,
         maxWidth: 190
       });
-      columns.push({
-        title: 'event_type',
-        minWidth: 230,
-        maxWidth: 230,
-        key: 'event_type',
-      });
-
-      columns.push( {
-          title: 'event_data',
-          key: 'event_data',
-          minWidth: 300
-        }
-      )
+      
       return columns;
     }
   },
   beforeMount() {
-    this.reportName = 'vos-event';
-    
-    this.domain = this.$route.params.domain;
-    this.intent = this.$route.params.intent === 'null' ? '' : this.$route.params.intent;
-
+    this.reportName = 'wakeup';
     let now = util.getTodayDate();
     this.filter.date = [now, now];
-    this.getVosEvent();
+    this.getWakeup();
   },
   methods: {
-    async getVosEvent(exportCsv) {
+    async getWakeup() {
       this.currentViewRow = -1; // 只要重新获取数据就重置当前查看的行
       
       let begin_date = undefined;
       let end_date = undefined;
-      let { event_type, env, vid, app_id } = this.filter;
+      let { rid, env, vid, app_id, ver, asr_text } = this.filter;
 
       if (this.filter.date.length > 0) {
         begin_date = this.filter.date[0] ? `${this.filter.date[0]} 00:00:00` : undefined;
@@ -141,31 +164,33 @@ export default {
       }
       this.loading = true;
       let response;
-      response = await api.getVosEventData(new Date(begin_date).getTime(), new Date(end_date).getTime(), app_id.toLowerCase().trim(), event_type.toLowerCase().trim(), vid.toLowerCase().trim(), env.toLowerCase().trim(), this.pagination.page, this.pagination.pageSize);
+      response = await api.getWakeupData(new Date(begin_date).getTime(), new Date(end_date).getTime(), app_id.toLowerCase().trim(), rid.toLowerCase().trim(), 
+                  vid.toLowerCase().trim(), ver.toLowerCase().trim(), env.toLowerCase().trim(),asr_text.toLowerCase().trim(), this.pagination.page, this.pagination.pageSize);
       
       this.loading = false;
       let data = response.data;
       this.data = data.data.map((item) => ({
-        vid: item[0],
+        asr_text: item[0],
+        vid: item[2],
+        request_id: item[3],
         date: new Date(item[1]).toLocaleString("zh-CN"),
-        app_id: item[2],
-        event_type: item[3],
-        event_data: item[4],
-        env: item[5]
+        app_id: item[5],
+        ver: item[6],
+        env: item[4]
       }));
       this.pagination.total = data.total;
     },
     pageChange(page) {
       document.querySelector('.content').scrollTop = 0; //翻页回到页面顶部
       this.pagination.page = page;
-      this.getVosEvent();
+      this.getWakeup();
     },
     dateChange(val) {
       this.filter.date = val;
       this.pagination.page = 1;
     },
     exportCsv() {
-      this.getVosEvent(true);
+      this.getWakeup(true);
     },
     currentViewRowCls(row, index) {
       if (index === this.currentViewRow) {

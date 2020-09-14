@@ -213,7 +213,7 @@ export default {
       this.loading = true;
       let response;
       
-      response = await api.getAsrDebugData(new Date(begin_date).getTime(), new Date(end_date).getTime(), requestId.toLowerCase(),  query.toLowerCase(),vid.toLowerCase(), env.toLowerCase(), appId, this.pagination.page, this.pagination.pageSize);
+      response = await api.getAsrDebugData(new Date(begin_date).getTime(), new Date(end_date).getTime(), requestId.toLowerCase().trim(),  query.toLowerCase().trim(),vid.toLowerCase().trim(), env.toLowerCase().trim(), appId.trim(), this.pagination.page, this.pagination.pageSize);
     
       this.loading = false;
       let data = response.data;

@@ -33,6 +33,11 @@ const REPORT = {
     icon: 'md-mic',
     name: 'face-data'
   },{
+    label: 'Wakeup',
+    to: '/wakeup',
+    icon: 'md-star',
+    name: 'face-data'
+  },{
     label: 'VosEvent',
     to: '/vos_event',
     icon: 'md-list',

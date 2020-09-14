@@ -82,9 +82,9 @@ export default {
       customQuery: customQuery
     });
   },
-  getVosDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, appId, customQuery, pageIndex, pageSize) {
+  getVosDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, appId, vossdk_ver, customQuery, pageIndex, pageSize) {
     return base('post', COMMON.report, {
-      report_name: "vos_debug2",
+      report_name: "vos_debug3",
       pageIndex,
       pageSize,
       begin_date,
@@ -98,6 +98,7 @@ export default {
       env: `%${env}%`,
       wakeup_asr_text: `%${wakeup_asr_text}%`,
       appId: `%${appId}%`,
+      vossdk_ver: `%${vossdk_ver}%`,
       operations: operation.toUpperCase() === 'NULL' ? '' : `%${operation}%`,
       customQuery: customQuery
     });
@@ -127,6 +128,21 @@ export default {
       event_type: `%${event_type}%`,
       vehicle_id: `%${vid}%`,
       env: `%${env}%`
+    });
+  },
+  getWakeupData(begin_date, end_date, app_id, request_id, vid, ver, env, asr_text, pageIndex, pageSize) {
+    return base('post', COMMON.report, {
+      report_name: "wakeup_query",
+      pageIndex,
+      pageSize,
+      begin_date,
+      end_date,
+      ver:`%${ver}%`,
+      app_id: `%${app_id}%`,
+      request_id: `%${request_id}%`,
+      vehicle_id: `%${vid}%`,
+      env: `%${env}%`,
+      asr_text: `%${asr_text}%`,
     });
   },
   getRequestInfo(requestId) {

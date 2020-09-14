@@ -24,6 +24,8 @@ const FbAsrDebug = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbAsrDebug');
 const FbVosEvent = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbVosEvent');
+const FbWakeup = () =>
+  import( /* webpackChunkName: "report" */ './views/report/FbWakeup');
 const FbVehLog = () =>
   import( /* webpackChunkName: "report" */ './views/report/FbVehLog');
 const FbReport = () =>
@@ -145,6 +147,21 @@ const routes = [{
       component: FbAsrDebug
     }
   ]
+  },
+  {
+    path: '/wakeup',
+    component: Main,
+    children: [{
+      path: '',
+      name: 'wakeup',
+      meta: {
+        bread: [{
+          label: 'wakeup',
+          to: '/wakeup'
+        }],
+      },
+      component: FbWakeup
+    }]
   },
   {
     path: '/vos_event',

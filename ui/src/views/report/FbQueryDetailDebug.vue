@@ -343,7 +343,7 @@ export default {
       this.loading = true;
       let response;
       
-      response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase(), sessionId.toLowerCase(), query.toLowerCase(), domain.toLowerCase(), vid.toLowerCase(), operation.toLowerCase(), intent.toLowerCase(), env.toLowerCase(), wakeup_asr_text.toUpperCase(), app_id, customQuery, this.pagination.page, this.pagination.pageSize);
+      response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase().trim(), sessionId.toLowerCase().trim(), query.toLowerCase().trim(), domain.toLowerCase().trim(), vid.toLowerCase().trim(), operation.toLowerCase().trim(), intent.toLowerCase().trim(), env.toLowerCase().trim(), wakeup_asr_text.toUpperCase().trim(), app_id.trim(), customQuery, this.pagination.page, this.pagination.pageSize);
       aisTool.Cookie.setData("debug_query.custom",customQuery)
       this.loading = false;
       let data = response.data;
