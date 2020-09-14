@@ -128,7 +128,7 @@ export default {
           render: (h, params) => {
             return h('AisAudio', {
               props: {
-                url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
+                url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
                 size: 14
               }
             })
