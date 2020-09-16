@@ -57,6 +57,7 @@ public class ReportController {
             byte[] data = dr.get((asrId).getBytes());
 
             response.setContentType("audio/x-wav");
+            response.setHeader("Content-Disposition", "attachment; filename=\"WAKEUP_"+rid+".wav\"");
             if (data != null) {
                 response.getOutputStream().write(data);
                 response.flushBuffer();
@@ -78,6 +79,7 @@ public class ReportController {
             }
 
             response.setContentType("audio/x-wav");
+            response.setHeader("Content-Disposition", "attachment; filename=\""+rid+".wav\"");
             if (data != null) {
                 response.getOutputStream().write(data);
                 response.flushBuffer();
@@ -90,6 +92,7 @@ public class ReportController {
         Jedis r = wavPool.getResource();
         byte[] data = r.get(key.getBytes());
         response.setContentType("audio/x-wav");
+        response.setHeader("Content-Disposition", "attachment; filename=\""+key+"\"");
         if( data != null ){
             response.getOutputStream().write(data);
             response.flushBuffer();
