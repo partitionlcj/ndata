@@ -130,7 +130,7 @@ export default {
       env: `%${env}%`
     });
   },
-  getWakeupData(begin_date, end_date, app_id, request_id, vid, ver, env, asr_text, pageIndex, pageSize) {
+  getWakeupData(begin_date, end_date, app_id, request_id, vid, ver, env, asr_text, platform_type, pageIndex, pageSize) {
     return base('post', COMMON.report, {
       report_name: "wakeup_query",
       pageIndex,
@@ -143,6 +143,7 @@ export default {
       vehicle_id: `%${vid}%`,
       env: `%${env}%`,
       asr_text: `%${asr_text}%`,
+      platform_type: `%${platform_type}%`
     });
   },
   getRequestInfo(requestId) {

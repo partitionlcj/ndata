@@ -13,11 +13,14 @@
         <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
-      <Col span="3" class="margin-bottom-10">
+      <Col span="2" class="margin-bottom-10">
       <Input placeholder="app_id" v-model="filter.app_id" @on-enter="pageChange(1)"></Input>
       </Col>
-      <Col span="5" class="margin-bottom-10">
+      <Col span="4" class="margin-bottom-10">
         <Input placeholder="request_id" v-model="filter.rid" @on-enter="pageChange(1)"></Input>
+      </Col>
+      <Col span="2" class="margin-bottom-10">
+        <Input placeholder="platform_type" v-model="filter.platform_type" @on-enter="pageChange(1)"></Input>
       </Col>
       <Col span="4" class="margin-bottom-10">
         <Input placeholder="vossdk version" v-model="filter.ver" @on-enter="pageChange(1)"></Input>
@@ -60,7 +63,8 @@ export default {
         vid: '',
         app_id: '',
         ver: '',
-        asr_text: ''
+        asr_text: '',
+        platform_type: ''
       },
       data: [],
       currentViewRow: -1
@@ -97,6 +101,12 @@ export default {
       columns.push( {
           title: '唤醒词',
           key: 'asr_text',
+          width: 150
+        }
+      )
+      columns.push( {
+          title: '平台类型',
+          key: 'platform_type',
           width: 150
         }
       )
@@ -138,7 +148,7 @@ export default {
         title: 'date',
         key: 'date',
         minWidth: 190,
-        maxWidth: 190
+        maxWidth: 500
       });
       
       return columns;
@@ -156,7 +166,7 @@ export default {
       
       let begin_date = undefined;
       let end_date = undefined;
-      let { rid, env, vid, app_id, ver, asr_text } = this.filter;
+      let { rid, env, vid, app_id, ver, asr_text, platform_type } = this.filter;
 
       if (this.filter.date.length > 0) {
         begin_date = this.filter.date[0] ? `${this.filter.date[0]} 00:00:00` : undefined;
@@ -165,7 +175,7 @@ export default {
       this.loading = true;
       let response;
       response = await api.getWakeupData(new Date(begin_date).getTime(), new Date(end_date).getTime(), app_id.toLowerCase().trim(), rid.toLowerCase().trim(), 
-                  vid.toLowerCase().trim(), ver.toLowerCase().trim(), env.toLowerCase().trim(),asr_text.toLowerCase().trim(), this.pagination.page, this.pagination.pageSize);
+                  vid.toLowerCase().trim(), ver.toLowerCase().trim(), env.toLowerCase().trim(),asr_text.toLowerCase().trim(),platform_type.toLowerCase().trim(), this.pagination.page, this.pagination.pageSize);
       
       this.loading = false;
       let data = response.data;
@@ -175,6 +185,7 @@ export default {
         request_id: item[3],
         date: new Date(item[1]).toLocaleString("zh-CN"),
         app_id: item[5],
+        platform_type: item[7],
         ver: item[6],
         env: item[4]
       }));
