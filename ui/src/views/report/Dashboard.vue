@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div>
+      <Button @click="setKeyPrefix('ds-mars-prod.100240130')">杰克豆</Button>
+      <Button @click="setKeyPrefix('ds-mars-prod.100990130')">齐悟</Button>
+      <Button @click="setKeyPrefix('ds-gn-prod.100240001')">广蔚</Button>
+    </div>
     <div style="display: flex; justify-content: space-around; margin-bottom: '10px'">
       <Card v-for="(item, index) in nomiUseHoursData" :key="item.name" :style="{flex:1, margin:'0 8px', backgroundColor: colors[index]}" class="info-card">
         <div style="padding: 16px">
@@ -39,6 +44,7 @@ export default {
   data() {
     return {
       today: '',
+      keyPrefix: 'ds-mars-prod.100240130',
       nomiUseSummary: null,
       nomiUseHoursInfo: null,
       colors: ['#00bebe', '#ffc107', '#f86c6b', '#20a8d8', '#63c2de', '#4dbd74', '#735973', '#96C5B0', '#E7AAB2']
@@ -46,7 +52,7 @@ export default {
   },
   computed: {
     useNomiHoursKey() {
-      return `ds-mars-prod.total.info.use_nomi_hours.d.${this.today}`;
+      return `${this.keyPrefix}.total.info.use_nomi_hours.d.${this.today}`;
     },
     useNomiSummaryKey() {
       return `ds-mars-prod.total.info.use_nomi.d.${this.today}`;
@@ -54,20 +60,17 @@ export default {
     baseSummaryData() {
       if (this.nomiUseSummary) {
         return [{
-          name: '总唤醒次数',
-          value: this.nomiUseSummary.sessionCount,
+          name: '唤醒次数',
+          value: this.nomiUseSummary.wakeupCount,
         }, {
-          name: '在线次数',
-          value: this.nomiUseSummary.onlineSessionCount,
+          name: 'ASR次数',
+          value: this.nomiUseSummary.asrCount,
         }, {
-          name: '离线次数',
-          value: this.nomiUseSummary.offlineSessionCount,
+          name: '设备数',
+          value: this.nomiUseSummary.vidCount,
         }, {
-          name: '总Query数',
+          name: 'Query数',
           value: this.nomiUseSummary.queryCount,
-        }, {
-          name: '被唤醒过的城市数目',
-          value: this.nomiUseSummary.cityCount
         }]
       }
       return [];
@@ -111,17 +114,17 @@ export default {
     nomiUseHoursData() {
       if (this.nomiUseHoursInfo) {
         return [{
-          name: '用户(vid)数',
+          name: '唤醒次数',
+          value: this.nomiUseHoursInfo.resultMap.wakeupCount
+        }, {
+          name: 'ASR次数',
+          value: this.nomiUseHoursInfo.resultMap.asrCount
+        }, {
+          name: '设备数',
           value: this.nomiUseHoursInfo.resultMap.vidCount
         }, {
-          name: 'session数',
-          value: this.nomiUseHoursInfo.resultMap.sessionCount
-        }, {
-          name: 'query数',
+          name: 'Query数',
           value: this.nomiUseHoursInfo.resultMap.queryCount
-        }, {
-          name: '平均交互数',
-          value: this.nomiUseHoursInfo.resultMap.useNomiRate
         }]
       }
       return [];
@@ -174,11 +177,16 @@ export default {
   },
   methods: {
     async loadData() {
-      let response = await api.getData([this.useNomiHoursKey, this.useNomiSummaryKey].join(','));
+      let response = await api.getData([this.useNomiHoursKey].join(','));
       if (response.state === 'success') {
-        this.nomiUseSummary = response.data[this.useNomiSummaryKey];
+        //this.nomiUseSummary = response.data[this.useNomiSummaryKey];
         this.nomiUseHoursInfo = response.data[this.useNomiHoursKey];
       }
+    },
+    setKeyPrefix(k){
+      this.keyPrefix = k;
+      console.log(this.keyPrefix)
+      this.loadData()
     },
     getOption(data) {
       return {
