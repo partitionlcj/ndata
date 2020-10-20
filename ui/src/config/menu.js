@@ -47,21 +47,6 @@ const REPORT = {
     to: '/veh_log',
     icon: 'md-cloud-download',
     name: 'veh_log'
-  }, {
-    label: '单日报表',
-    to: '/report/daily',
-    icon: 'md-analytics',
-    name: 'daily-report'
-  }, {
-    label: '单周报表',
-    to: '/report/weekly',
-    icon: 'md-analytics',
-    name: 'weekly-report'
-  }, {
-    label: '月度报表',
-    to: '/report/monthly',
-    icon: 'md-analytics',
-    name: 'month-report'
   }]
 }
 
