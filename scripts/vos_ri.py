@@ -35,7 +35,7 @@ class VosReqInfo:
 def parse(o, vri):
   ver = o.get('versions')
   if ver != None:
-    vri.vossdk_ver = ver.get('vossdk','N/A')
+    vri.vossdk_ver = ver.get('vos_sdk_release','N/A')
   asrNluRequestHeader = o.get('asrNluRequestHeader')
   if asrNluRequestHeader != None:
     vri.request_id = asrNluRequestHeader.get("id","")

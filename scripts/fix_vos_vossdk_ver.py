@@ -15,8 +15,9 @@ def fix_app_id():
   )
 
   with db.cursor() as c:
-    c.execute("select request_id from vos_debug_query where vossdk_ver is null or vossdk_ver = ''    ")
+    c.execute("select request_id from vos_debug_query")
     rs = c.fetchall()
+    i = 0
     for r in rs:
       ver = ''
       request_id = r.get('request_id')
@@ -29,14 +30,17 @@ def fix_app_id():
         o = json.loads(input)
         o1 = o.get('versions',None)
         if o1 != None:
-          ver = o1.get('vossdk','N/A')
+          ver = o1.get('vos_sdk_release','N/A')
       except:
         print(f"fail to parse {o}")
         continue
      
       c.execute('update vos_debug_query set vossdk_ver=%s where request_id=%s',[ver, request_id])
+      i = i +1 
+      if i % 10 == 0:
+        db.commit()
       print(request_id)
-      db.commit()
+    db.commit()
 
 
 fix_app_id()
