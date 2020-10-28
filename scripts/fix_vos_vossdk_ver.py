@@ -30,7 +30,9 @@ def fix_app_id():
         o = json.loads(input)
         o1 = o.get('versions',None)
         if o1 != None:
-          ver = o1.get('vos_sdk_release','N/A')
+          ver = o1.get('vos_sdk_release')
+          if ver == None:
+            ver = o1.get('vossdk','N/A')  
       except:
         print(f"fail to parse {o}")
         continue
@@ -39,7 +41,7 @@ def fix_app_id():
       i = i +1 
       if i % 10 == 0:
         db.commit()
-      print(request_id)
+      print(request_id +'\t'+ver)
     db.commit()
 
 
