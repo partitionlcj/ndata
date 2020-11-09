@@ -35,7 +35,7 @@
       <!-- <chart auto-resize :options="nomiUseHoursOption" theme="light" style="width: 100%;"></chart> -->
       <chart
         auto-resize
-        :options="nomiUseHoursDomainOption"
+        :options="hourlyUseHoursDomainOption"
         theme="light"
         style="width: 100%"
       ></chart>
@@ -56,10 +56,22 @@
         <h5>{{ item.name }}</h5>
       </Card>
     </div>
+    <Divider>自定义查询</Divider>
+      <DatePicker type="daterange" @on-change="chartDataChange" format="yyyyMMdd" placement="bottom-end" placeholder="选择时间范围" style="width: 200px"></DatePicker>
+      当前APP: <b>{{title}}</b>
+    <Card class="margin-bottom-10 margin-top-10">
+      <chart
+        auto-resize
+        :options="keyMetricsOptions"
+        theme="light"
+        style="width: 100%"
+      ></chart>
+    </Card>
   </div>
 </template>
 <script>
 import moment from "moment";
+
 import api from "../../api/report";
 import StackLine from "../../components/Line/StackLine";
 export default {
@@ -78,6 +90,9 @@ export default {
       keyPrefix: "ds-mars-prod.100240130",
       nomiUseSummary: null,
       nomiUseHoursInfo: null,
+      chartData: null,
+      dateKeys: [],
+      chartDateRange: [],
       colors: [
         "#00bebe",
         "#ffc107",
@@ -184,7 +199,7 @@ export default {
       }
       return [];
     },
-    nomiUseHoursDomainOption() {
+    hourlyUseHoursDomainOption() {
       let series = [];
       let xAxisData = Array.from(Array(24).keys()).map((num) =>
         String(num).padStart(2, "0")
@@ -227,12 +242,92 @@ export default {
         series: series,
       };
     },
+    keyMetricsOptions() {
+      if (this.chartData) {
+        let series = [];
+        let xAxisData = Array.from(this.dateKeys).map((k) =>
+          k.substring(k.length - 4, k.length-2) + "/" + k.substring(k.length - 2, k.length)
+        );
+
+        let legendData = [{k:'wakeup0Count',n:'主唤醒次数'},{k:'wakeup4Count',n:"自定义唤醒次数"},{k:'asrCount',n:'ASR次数'},{k:'vidCount',n:'设备数'},{k:'queryCount',n:'Query数'}]
+        let that = this
+        legendData.forEach((k, index) => {
+          series.push({
+            name: k['n'],
+            type: "line",
+            lineStyle: {
+              color: this.colors[index],
+            },
+            data: that.getMetricsData(k['k'])
+          });
+        });
+      
+        return {
+          tooltip: {
+            trigger: "axis",
+          },
+          color: this.colors,
+          legend: {
+            data: ['主唤醒次数','自定义唤醒次数','ASR次数','设备数','Query数'],
+            icon: "pin",
+          },
+          grid: {
+            left: "5%",
+            right: "5%",
+            bottom: "5%",
+          },
+          xAxis: {
+            boundaryGap: false,
+            data: xAxisData,
+          },
+          yAxis: {
+            type: "value",
+          },
+          series: series,
+        };
+      }
+    },
   },
   created() {
     this.today = moment().format("YYYYMMDD");
+    this.chartDateRange = [moment().subtract(14,'d').format('YYYYMMDD'),this.today]
     this.loadData();
+    this.loadChartData();
   },
   methods: {
+    chartDataChange(val){
+      console.log(val)
+      this.chartDateRange = val
+      this.loadChartData()
+    },
+    getMetricsData(k){
+      let data = []
+      this.dateKeys.forEach((v,idx)=>{
+        if (this.chartData[v]){
+          data.push(this.chartData[v][k])
+        }
+      })
+      return data
+    },
+    async loadChartData(){
+      this.dateKeys = []
+      let startDate = moment(this.chartDateRange[0], "YYYYMMDD")
+      let endDate   = moment(this.chartDateRange[1], "YYYYMMDD")
+      let dateRange = moment().range(startDate, endDate);
+
+      const days = Array.from(dateRange.by('day'));
+      days.map(m => {
+        let dt = m.format('YYYYMMDD');
+        this.dateKeys.push(`${this.keyPrefix}.total.info.use_nomi.d.${dt}`)
+      }) 
+
+      let response = await api.getData(
+        this.dateKeys.join(",")
+      );
+      if (response.state === "success") {
+        this.chartData = response.data
+      }
+    },
     async loadData() {
       let response = await api.getData(
         [this.useNomiHoursKey, this.useNomiSummaryKey].join(",")
@@ -250,6 +345,7 @@ export default {
       this.keyPrefix = k;
       this.title = title;
       this.loadData();
+      this.loadChartData();
     },
     getOption(data) {
       return {
