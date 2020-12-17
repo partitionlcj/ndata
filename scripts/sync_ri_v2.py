@@ -44,6 +44,8 @@ class HuDataTracking(object):
         self.use_inhouse = ''
         self.voice_id = 0
         self.output = ''
+        self.continuous_dialog = False
+        self.bfwav = 0
 
     def get_req_infos(self, r):
         if r != None:
@@ -134,6 +136,7 @@ class HuDataTracking(object):
         self.oneshot = input.get('oneshot', None)
         self.app_id = input.get('app_id', None)
        
+
         q = input.get("query",None)
         if q != None and self.query != 'N/A' and  q != self.query:
             print("[Fix] find query correction: " + q)
@@ -143,6 +146,7 @@ class HuDataTracking(object):
         self.voice_id = int(extra.get('voiceId',0))
         self.sd_ver = extra.get('sdVer',None)
         self.sound_location = extra.get('soundLocation',None)
+        self.continuous_dialog = extra.get("continuousDialog",False)
 
         if r != None and 'intentList' in r and len(r['intentList']) > 0:
             intents = ''
@@ -196,18 +200,17 @@ class HuDataTracking(object):
                 self.city = ct.get('name')
                 self.province = ct.get('province')
 
-        self.save_db()
-
     def save_db(self):
         with db.cursor() as c:
             c.execute(
-                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)",
+                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id,continuous_dialog,bfwav) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s)",
                 (self.request_id, self.vehicle_id, self.session_id, self.user_id, self.query, self.nlu_type,
                  self.final_tts, self.final_view_text, self.ts, self.domain, self.intents, self.multi_round, self.env,
                  self.city, self.province, self.request_trigger_by, self.use_response, 
                  self.sound_location, self.state, self.operations, self.catemr, self.cst_id, self.client_version,
-                 self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id))
+                 self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id, self.continuous_dialog,self.bfwav))
+            print(self.request_id)
             db.commit()
 
 def process_vid_file(fn):
@@ -259,7 +262,6 @@ def pipeline(hour):
             if rid not in rids: #and  and :
                 hdt = HuDataTracking()
 
-                print(rid)
                 hdt.get_req_infos(r1)
                 insert_query += 1
 
@@ -270,8 +272,27 @@ def pipeline(hour):
                 if audio_dump(rid,ts2,provider):
                     pcm2wav(rid)
                     save2ssdb(rid)
+                    bfwav(rid,ts2,provider,hdt)
+
+                hdt.save_db()
 
         print(f"total {total_query} queries, insert {insert_query} queries")
+
+def bfwav(rid,ts2,provider,hdt):
+  check_bfwav(rid,ts2,provider,1,0,hdt)
+  #check_bfwav(rid,ts2,provider,1,1,hdt)
+  check_bfwav(rid,ts2,provider,4,0,hdt)
+  #check_bfwav(rid,ts2,provider,4,1,hdt)
+
+def check_bfwav(rid,ts2,provider,channel,useSpeex,hdt):
+  nRid = f"{rid}_{channel}_{useSpeex}"
+  if audio_dump(nRid,ts2,provider):
+    if channel == 1:
+      pcm2wav(nRid)
+    else:
+      pcm2wav_4channel(nRid)
+    save2ssdb2(f"{rid}_{channel}", nRid)
+    hdt.bfwav = hdt.bfwav + channel
 
 def asr_pipeline(hour):
     back_time = hour*60*60*1000
@@ -317,7 +338,6 @@ def audio_dump(rid, ts, provider='aws'):
 
     if provider == 'hw':
         bucket = 'ais-storage-gz'
-        print('hw')
         s3 = boto3.resource(
                     's3',
                     aws_access_key_id='EPYG0BBE0O37MORZ8WGE',
@@ -330,7 +350,6 @@ def audio_dump(rid, ts, provider='aws'):
     KEY = 'audio_data/'+ dt +'/' + rid
 
     try:
-        print(KEY)
         s3.Bucket(bucket).download_file(KEY, rid)
         return True
     except botocore.exceptions.ClientError as e:
@@ -344,31 +363,39 @@ def pcm2wav(rid):
     fn = rid
     p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
     output, err = p.communicate("")
-    print(output)
-    print(err)
+    #print(output)
+    #print(err)
 
-def pcm2wav1(rid):
+def pcm2wav_4channel(rid):
     with open(rid, 'rb') as pcmfile:
         pcmdata = pcmfile.read()
     with wave.open( rid + '.wav', 'wb') as wavfile:
-        wavfile.setparams((1, 2, 16000, 0, 'NONE', 'NONE'))
+        wavfile.setparams((4, 2, 16000, 0, 'NONE', 'NONE'))
         wavfile.writeframes(pcmdata)
 
 def save2ssdb(rid):
     with open( rid + '.wav', 'rb') as wavfile:
         data = wavfile.read()
-        print(rid+".wav")
         ssdb_save(rid,data)
+        print("add wav "+rid)
     os.remove(rid)
     os.remove(rid+".wav")
-    
+
+def save2ssdb2(key,fn):
+    with open( fn + '.wav', 'rb') as wavfile:
+        data = wavfile.read()
+        ssdb_save(key,data)
+        print("add wav "+key)
+    os.remove(fn)
+    os.remove(fn+".wav")
+    print(f"save {fn} to key")
 
 if __name__ == '__main__':
     init()
     db = conn['db']
     db_ri = conn['db_ri']
     hour = int(sys.argv[1])
-    asr_pipeline(hour)
+    #asr_pipeline(hour)
     pipeline(hour)
     
     

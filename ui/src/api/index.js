@@ -64,7 +64,7 @@ export default {
   },
   getDebugData(begin_date, end_date, requestId, sessionId, query, domain, vid, operation, intent, env, wakeup_asr_text, app_id, customQuery, pageIndex, pageSize) {
     return base('post', COMMON.report, {
-      report_name: "debug2",
+      report_name: "debug3",
       pageIndex,
       pageSize,
       begin_date,

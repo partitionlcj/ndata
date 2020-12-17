@@ -192,6 +192,30 @@ export default {
         },
       });
       columns.push({
+        title: "bfwav",
+        minWidth: 40,
+        render: (h, params) => {
+          let wavs = []
+          if( params.row.bfwav == 1 || params.row.bfwav == 5){
+            wavs.push(h("AisAudio", {
+              props: {
+                url: `/api/audio/download_wav?requestId=${params.row.request_id}_1`,
+                size: 14,
+              },
+            }))
+          }
+          if( params.row.bfwav == 4 || params.row.bfwav == 5){
+            wavs.push(h("AisAudio", {
+              props: {
+                url: `/api/audio/download_wav?requestId=${params.row.request_id}_4`,
+                size: 14,
+              },
+            }))
+          }
+          return h("div", wavs);
+        },
+      });
+      columns.push({
         title: "tts",
         minWidth: 200,
         render: (h, params) => {
@@ -401,6 +425,7 @@ export default {
         wakeup_asr_text: item[12],
         app_id: item[13],
         badcase: item[14],
+        bfwav: item[15],
         hasSubmited: false,
       }));
       this.pagination.total = data.total;
