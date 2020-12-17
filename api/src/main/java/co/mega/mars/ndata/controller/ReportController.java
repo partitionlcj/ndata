@@ -71,13 +71,6 @@ public class ReportController {
             String asrId = rid;
             byte[] data = dr.get((asrId).getBytes());
 
-            if (data == null || data.length == 0) {
-                try(Jedis r = wavPool.getResource()) {
-                    asrId = jdbcTemplate.queryForObject("select asr_id from voice_info_upload_record where request_id=?", new Object[]{rid}, String.class);
-                    data = r.get((asrId + ".wav").getBytes());
-                }
-            }
-
             response.setContentType("audio/x-wav");
             response.setHeader("Content-Disposition", "attachment; filename=\""+rid+".wav\"");
             if (data != null) {

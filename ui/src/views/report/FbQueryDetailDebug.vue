@@ -40,7 +40,7 @@
           <Input placeholder="env" v-model="filter.env" @on-enter="pageChange(1)"></Input>
         </Col>
         <Col span="15" class="margin-bottom-10">
-          <Input placeholder="自定义查询，会覆盖其他条件, 示例: app_id='100240001' and env !='ds-gn-stg'" v-model="filter.customQuery" @on-enter="pageChange(1)"></Input>
+          <Input placeholder="自定义查询，会覆盖其他条件, 示例: app_id='100240001' and env !='ds-gn-stg' and continuous_dialog=1" v-model="filter.customQuery" @on-enter="pageChange(1)"></Input>
         </Col>
       </template>
       </Col>
@@ -52,268 +52,275 @@
   </div>
 </template>
 <script>
-import aisTool from 'ais-components';
-import api from '../../api';
-import real from '../../api/real';
-import InfoModal from '../../components/Modal/InfoModal';
-import BadcaseModal from '../../components/Modal/BadcaseModal';
-import util from '../../util';
+import aisTool from "ais-components";
+import api from "../../api";
+import real from "../../api/real";
+import InfoModal from "../../components/Modal/InfoModal";
+import BadcaseModal from "../../components/Modal/BadcaseModal";
+import util from "../../util";
 export default {
   components: {
     InfoModal,
-    BadcaseModal
+    BadcaseModal,
   },
   data() {
     return {
-      currentSessionId: '',
+      currentSessionId: "",
       currentRow: null,
-      reportName: '',
-      domain: '',
-      intent: '',
+      reportName: "",
+      domain: "",
+      intent: "",
       loading: false,
       showModal: false,
       showBadcaseModal: false,
-      sysResult: '',
+      sysResult: "",
       pagination: {
         page: 1,
         pageSize: 30,
-        total: 0
+        total: 0,
       },
       filter: {
         date: [],
-        query: '',
-        env: '',
-        app_id: '',
-        domain: '',
-        vid: '',
-        operation: '',
-        intent: '',
-        sessionId: '',
-        requestId: '',
-        wakeup_asr_text: '',
-        customQuery: ''
+        query: "",
+        env: "",
+        app_id: "",
+        domain: "",
+        vid: "",
+        operation: "",
+        intent: "",
+        sessionId: "",
+        requestId: "",
+        wakeup_asr_text: "",
+        customQuery: "",
       },
       data: [],
-      currentViewRow: -1
-    }
+      currentViewRow: -1,
+    };
   },
   watch: {
     showModal(newVal) {
       if (!newVal) {
-        this.sysResult = '';
+        this.sysResult = "";
       }
-    }
+    },
   },
   computed: {
     isMega() {
-      return aisTool.Cookie.getData("ops-org") === "mega"
+      return aisTool.Cookie.getData("ops-org") === "mega";
     },
     columns() {
       let columns = [
         {
-        title: 'reqId',
-        key: 'request_id',
-        width: 80,
-        render: (h, params) => {
-          return h('Tooltip', {
-            props: {
-              content: params.row.request_id
-            }
-          }, params.row.request_id.slice(params.row.request_id.length - 5));
+          title: "reqId",
+          key: "request_id",
+          width: 70,
+          render: (h, params) => {
+            return h(
+              "Tooltip",
+              {
+                props: {
+                  content: params.row.request_id,
+                },
+              },
+              params.row.request_id.slice(params.row.request_id.length - 4)
+            );
+          },
+        },
+        {
+          title: "sId",
+          key: "session_id",
+          width: 70,
+          render: (h, params) => {
+            return h(
+              "Tooltip",
+              {
+                props: {
+                  content: params.row.session_id,
+                },
+              },
+              params.row.session_id.slice(params.row.session_id.length - 4)
+            );
+          },
+        },
+      ];
+      columns.push(
+        {
+          title: "vid",
+          key: "vid",
+          width: 70,
+          render: (h, params) => {
+            return h(
+              "Tooltip",
+              {
+                props: {
+                  content: params.row.vid,
+                },
+              },
+              params.row.vid.slice(params.row.vid.length - 4)
+            );
+          },
+        },
+        {
+          title: "appId",
+          minWidth: 70,
+          render: (h, params) => {
+            return h(
+              "Tooltip",
+              {
+                props: {
+                  content: params.row.app_id,
+                },
+              },
+              params.row.app_id.slice(params.row.app_id.length - 4)
+            );
+          },
         }
-      },{
-        title: 'sesId',
-        key: 'session_id',
-        width: 80,
-        render: (h, params) => {
-          return h('Tooltip', {
-            props: {
-              content: params.row.session_id
-            }
-          }, params.row.session_id.slice(params.row.session_id.length - 5));
-        }
-      }
-      ]
+      );
       columns.push({
-        title: 'vid',
-        key: 'vid',
-        width: 80,
-        render: (h, params) => {
-          return h('Tooltip', {
-            props: {
-              content: params.row.vid
-            }
-          }, params.row.vid.slice(params.row.vid.length - 5));
-        }
-      }, {
-        title: 'app_id',
-        key: 'app_id',
-        minWidth: 70
-      }, {
-        title: 'domain',
-        key: 'domain',
-        minWidth: 70
-      });
-      
-      columns.push({
-        title: 'query',
-        key: 'query',
+        title: "query",
         minWidth: 150,
+        render: (h, params) => {
+          return h("div", [
+            h("div", params.row.query),
+            h("AisAudio", {
+              props: {
+                url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
+                size: 14,
+              },
+            }),
+          ]);
+        },
       });
       columns.push({
-        title: 'tts',
+        title: "tts",
         minWidth: 200,
         render: (h, params) => {
           let tts = JSON.parse(params.row.tts);
-          return h('ul', tts.map(item => h('li', item.content)));
-        }
+          return h(
+            "ul",
+            tts.map((item) => h("li", item.content))
+          );
+        },
       });
-      //if (this.reportName === 'fact-data') {
-        columns.push({
-          title: 'intent',
-          key: 'intent',
-          minWidth: 100
-        }, {
-          title: 'operation',
-          key: 'operation',
-          minWidth: 100
-        }, {
-          title: '音频',
-          width: 70,
+      columns.push(
+        {
+          title: "domain/intent/operation",
+          minWidth: 120,
           render: (h, params) => {
-            return h('AisAudio', {
-              props: {
-                url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
-                size: 14
-              }
-            })
-          }
+            return h("div", [
+                h("div", params.row.domain),
+                h("div", params.row.intent),
+                h("div", params.row.operation),
+              ]);
+            }
         },
         {
-          title: '唤醒',
-          width: 90,
+          title: "唤醒",
+          width: 120,
           render: (h, params) => {
-            if( params.row.wakeup === 1){
-              return h('AisAudio', {
-                props: {
-                  url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
-                  size: 14
-                }
-              })
+            if (params.row.wakeup === 1) {
+              return h("div", [
+                h("div", params.row.wakeup_asr_text),
+                h("AisAudio", {
+                  props: {
+                    url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
+                    size: 14,
+                  },
+                }),
+              ]);
+            } else {
+              return h("div", "N/A");
             }
-            else{
-              return h('div', "N/A")
-            }
-            
-          }
-        },
-        {
-          title: '唤醒词',
-          key: 'wakeup_asr_text',
-          minWidth: 100,
+          },
         }
-        )
-      
-      if( aisTool.Cookie.getData("ops-org") === "mega" ){
+      );
+
+      if (aisTool.Cookie.getData("ops-org") === "mega") {
         columns.push({
-            title: 'env',
-            key: 'env',
-            minWidth: 80
-          })
+          title: "env",
+          key: "env",
+          minWidth: 80,
+        });
         columns.push({
-          title: '详情',
+          title: "详情",
           width: 100,
-          align: 'center',
-          key: 'detail',
+          align: "center",
+          key: "detail",
           render: (h, params) => {
-            return h('Button', {
-              props: {
-                type: 'primary',
-                size: 'small'
-              },
-              on: {
-                click: () => {
-                  this.currentViewRow = params.row._index;
-                  this.viewDetail(params.row.session_id,params.row.request_id);
-                }
-              }
-            }, '详情');
-          }
-        })
-        columns.push({
-          title: 'badcase',
-          width: 100,
-          align: 'center',
-          key: 'detail',
-          render: (h, params) => {
-            if( params.row.badcase === 0){
-              return h('Button', {
-                props: {
-                  type: 'warning',
-                  size: 'small'
+            var badecase_div = null;
+            if (params.row.badcase === 0) {
+              badecase_div = h(
+                "Button",
+                {
+                  props: {
+                    type: "warning",
+                    size: "small",
+                  },
+                  on: {
+                    click: () => {
+                      this.currentViewRow = params.row._index;
+                      this.currentRow = params.row;
+                      this.badcase(params.row);
+                    },
+                  },
                 },
-                on: {
-                  click: () => {
-                    this.currentViewRow = params.row._index;
-                    this.currentRow = params.row;
-                    this.badcase(params.row);
-                  }
-                }
-              }, 'badcase');
+                "badcase"
+              );
+            } else {
+              let msg = "已提交";
+              if (params.row.badcase === 1001) {
+                msg = "音频截断";
+              }
+              if (params.row.badcase === 9999) {
+                msg = "低质音频";
+              }
+              badecase_div = h("div", msg);
             }
-            else{
-              let msg = '已提交'
-              if( params.row.badcase === 1001 ){
-                msg = '音频截断'
-              }
-              if( params.row.badcase === 9999 ){
-                msg = '低质音频'
-              }
-              return h('div', msg)
-            }
-          }
-        })
-        columns.push({
-          title: 'ReqInfo',
-          width: 100,
-          align: 'center',
-          key: 'detail',
-          render: (h, params) => {
-            return h('Button', {
-              props: {
-                type: 'success',
-                size: 'small'
-              },
-              on: {
-                click: () => {
-                  this.currentViewRow = params.row._index;
-                  window.open("/api/debug/getReqInfo?rid="+params.row.request_id, "_blank")
-                }
-              }
-            }, 'ReqInfo');
-          }
-        })
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    size: "small",
+                  },
+                  on: {
+                    click: () => {
+                      this.currentViewRow = params.row._index;
+                      window.open(
+                        "/api/debug/getReqInfo?rid=" + params.row.request_id,
+                        "_blank"
+                      );
+                    },
+                  },
+                },
+                "ReqInfo"
+              ),
+              badecase_div,
+            ]);
+          },
+        });
       }
 
       columns.push({
-        title: '更新时间',
-        key: 'updated_at',
+        title: "更新时间",
+        key: "updated_at",
         minWidth: 100,
       });
-      
+
       return columns;
-    }
+    },
   },
   beforeMount() {
-    this.reportName = 'fact-data';
+    this.reportName = "fact-data";
     this.domain = this.$route.params.domain;
-    this.intent = this.$route.params.intent === 'null' ? '' : this.$route.params.intent;
+    this.intent =
+      this.$route.params.intent === "null" ? "" : this.$route.params.intent;
     let now = util.getTodayDate();
     //let now = '2019-06-01';
     this.filter.date = [now, now];
-    this.filter.customQuery = aisTool.Cookie.getData("debug_query.custom") + ""
-    if( this.filter.customQuery == "undefined" ){
-      this.filter.customQuery = ""
+    this.filter.customQuery = aisTool.Cookie.getData("debug_query.custom") + "";
+    if (this.filter.customQuery == "undefined") {
+      this.filter.customQuery = "";
     }
     this.getDomainIntentQueryDetail();
   },
@@ -321,9 +328,9 @@ export default {
     async getDomainIntentQueryDetail(exportCsv) {
       this.currentViewRow = -1; // 只要重新获取数据就重置当前查看的行
       if (!!this.filter.vin) {
-        let vidRes = await real.getVid(this.filter.vin)
-        if (vidRes.state !== 'success' || vidRes.data.total === 0) {
-          this.$Message.error('没有该vid的数据');
+        let vidRes = await real.getVid(this.filter.vin);
+        if (vidRes.state !== "success" || vidRes.data.total === 0) {
+          this.$Message.error("没有该vid的数据");
           return;
         } else {
           this.filter.vid = vidRes.data.data[0][0];
@@ -332,19 +339,51 @@ export default {
 
       let begin_date = undefined;
       let end_date = undefined;
-      let { requestId, sessionId, query, domain, operation, intent, vid, env, wakeup_asr_text, app_id, customQuery } = this.filter;
+      let {
+        requestId,
+        sessionId,
+        query,
+        domain,
+        operation,
+        intent,
+        vid,
+        env,
+        wakeup_asr_text,
+        app_id,
+        customQuery,
+      } = this.filter;
 
-      operation = operation
+      operation = operation;
 
       if (this.filter.date.length > 0) {
-        begin_date = this.filter.date[0] ? `${this.filter.date[0]} 00:00:00` : undefined;
-        end_date = this.filter.date[1] ? `${this.filter.date[1]} 23:59:59` : undefined;
+        begin_date = this.filter.date[0]
+          ? `${this.filter.date[0]} 00:00:00`
+          : undefined;
+        end_date = this.filter.date[1]
+          ? `${this.filter.date[1]} 23:59:59`
+          : undefined;
       }
       this.loading = true;
       let response;
-      
-      response = await api.getDebugData(begin_date, end_date, requestId.toLowerCase().trim(), sessionId.toLowerCase().trim(), query.toLowerCase().trim(), domain.toLowerCase().trim(), vid.toLowerCase().trim(), operation.toLowerCase().trim(), intent.toLowerCase().trim(), env.toLowerCase().trim(), wakeup_asr_text.toUpperCase().trim(), app_id.trim(), customQuery, this.pagination.page, this.pagination.pageSize);
-      aisTool.Cookie.setData("debug_query.custom",customQuery)
+
+      response = await api.getDebugData(
+        begin_date,
+        end_date,
+        requestId.toLowerCase().trim(),
+        sessionId.toLowerCase().trim(),
+        query.toLowerCase().trim(),
+        domain.toLowerCase().trim(),
+        vid.toLowerCase().trim(),
+        operation.toLowerCase().trim(),
+        intent.toLowerCase().trim(),
+        env.toLowerCase().trim(),
+        wakeup_asr_text.toUpperCase().trim(),
+        app_id.trim(),
+        customQuery,
+        this.pagination.page,
+        this.pagination.pageSize
+      );
+      aisTool.Cookie.setData("debug_query.custom", customQuery);
       this.loading = false;
       let data = response.data;
       this.data = data.data.map((item) => ({
@@ -362,29 +401,29 @@ export default {
         wakeup_asr_text: item[12],
         app_id: item[13],
         badcase: item[14],
-        hasSubmited: false
+        hasSubmited: false,
       }));
       this.pagination.total = data.total;
     },
     pageChange(page) {
-      document.querySelector('.content').scrollTop = 0; //翻页回到页面顶部
+      document.querySelector(".content").scrollTop = 0; //翻页回到页面顶部
       this.pagination.page = page;
       this.getDomainIntentQueryDetail();
     },
-    async viewDetail(sessionId,requestId) {
+    async viewDetail(sessionId, requestId) {
       this.currentSessionId = sessionId;
       let response = await api.getRequestInfo(requestId);
-      if (response.state === 'success') {
+      if (response.state === "success") {
         this.sysResult = response.data;
         this.showModal = true;
       }
     },
     badcase(params) {
-      this.currentRow = params
+      this.currentRow = params;
       this.showBadcaseModal = true;
     },
-    updateBadcase(){
-      this.currentRow.badcase = 1
+    updateBadcase() {
+      this.currentRow.badcase = 1;
       this.showBadcaseModal = false;
     },
     dateChange(val) {
@@ -396,24 +435,22 @@ export default {
     },
     currentViewRowCls(row, index) {
       if (index === this.currentViewRow) {
-        return 'viewing-row';
+        return "viewing-row";
       }
       if (row.hasSubmited) {
-        return 'submited-row';
+        return "submited-row";
       }
-      return '';
-    }
-  }
-}
-
+      return "";
+    },
+  },
+};
 </script>
 <style scoped>
-.detail-table>>>.viewing-row td {
+.detail-table >>> .viewing-row td {
   background-color: #00bebe;
 }
 
-.detail-table>>>.submited-row td {
+.detail-table >>> .submited-row td {
   background-color: #c5c8ce;
 }
-
 </style>
