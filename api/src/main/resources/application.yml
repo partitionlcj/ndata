@@ -45,5 +45,5 @@ security:
 veh:
   log:
     url:
-      prefix: http://marsops.i-tetris.com:8888/veh_log/
+      prefix: http://ais.i-tetris.com:8888/veh_log/
     path: /Users/zhouji/codes/ndata/api/src/test/log_data

@@ -143,7 +143,7 @@ public class ReportController {
         String rid = p.get("request_id").getAsString();
 
         try(CloseableHttpClient client = HttpClients.createDefault()){
-            String url = String.format("http://marsops.i-tetris.com:9890/api/nlu/asr/badcase");
+            String url = String.format("http://ais.i-tetris.com:9890/api/nlu/asr/badcase");
             HttpPost httpPost = new HttpPost(url);
             StringEntity entity = new StringEntity(json,"utf-8");
             httpPost.setEntity(entity);
@@ -164,7 +164,7 @@ public class ReportController {
 
     public static void main(String[] args) {
         try(CloseableHttpClient client = HttpClients.createDefault()){
-            String url = String.format("http://marsops.i-tetris.com:9890/api/nlu/asr/badcase");
+            String url = String.format("http://ais.i-tetris.com:9890/api/nlu/asr/badcase");
             HttpPost httpPost = new HttpPost(url);
             StringEntity entity = new StringEntity("{'request_id':'aaa','text':'test','asr_text':'test_asr','type':1000,'weight':1}");
             httpPost.setEntity(entity);
