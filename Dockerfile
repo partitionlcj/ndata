@@ -19,7 +19,7 @@ RUN yum update -y && \
     localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-ENV USER_DIR /data/app/mars-ops
+ENV USER_DIR /data/app/mars-ndata
 
 RUN yum -y install tar
 RUN yum -y install vim

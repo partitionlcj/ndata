@@ -79,7 +79,7 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = 'WAKEUP_' + rid
-    p = Popen(["./SpeexToPcm",fn+'.pcm', fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata')
+    p = Popen(["./SpeexToPcm",fn+'.pcm', fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/data/app/mars-ndata/scripts')
     output, err = p.communicate("")
     print(output)
     print(err)
