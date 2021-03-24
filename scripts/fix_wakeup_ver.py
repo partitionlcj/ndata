@@ -1,9 +1,10 @@
 import json
+import sys
 import time
 import pymysql
 from datetime import datetime
 
-def fix_ver():
+def fix_ver(hour):
   db = pymysql.connect(
         host='10.25.9.37',
         port=3306,
@@ -14,8 +15,10 @@ def fix_ver():
         cursorclass=pymysql.cursors.DictCursor,
   )
 
+  ts = int(time.time()*1000) - hour*60*60*1000
+
   with db.cursor() as c:
-    c.execute("select id from wakeup_info where vossdk_ver is null or vossdk_ver = ''")
+    c.execute("select id from wakeup_info where sdk_version is null or sdk_version = '' and timestamp>%s",[ts])
     rs = c.fetchall()
     for r in rs:
       ver = ''
@@ -34,9 +37,9 @@ def fix_ver():
         print(f"fail to parse {o}")
         continue
      
-      c.execute('update wakeup_info set vossdk_ver=%s where id=%s',[ver, request_id])
+      c.execute('update wakeup_info set sdk_version=%s where id=%s',[ver, request_id])
       print(request_id)
       db.commit()
 
-
-fix_ver()
+hour = int(sys.argv[1])
+fix_ver(hour)

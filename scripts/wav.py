@@ -44,7 +44,7 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = rid
-    p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
+    p = Popen(["./spx_decoder",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
     output, err = p.communicate("")
     print(output)
     print(err)

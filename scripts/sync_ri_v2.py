@@ -139,7 +139,7 @@ class HuDataTracking(object):
 
         q = input.get("query",None)
         if q != None and self.query != 'N/A' and  q != self.query:
-            print("[Fix] find query correction: " + q)
+            print("[Fix] find query correction, original query is " + q)
             self.query = self.query + "^" + q
 
         extra = input.get('extra',{})
@@ -147,6 +147,10 @@ class HuDataTracking(object):
         self.sd_ver = extra.get('sdVer',None)
         self.sound_location = extra.get('soundLocation',None)
         self.continuous_dialog = extra.get("continuousDialog",False)
+        if self.continuous_dialog == 'true':
+            self.continuous_dialog = True
+        if self.continuous_dialog == 'false':
+            self.continuous_dialog = False
 
         if r != None and 'intentList' in r and len(r['intentList']) > 0:
             intents = ''
@@ -272,7 +276,7 @@ def pipeline(hour):
                 if audio_dump(rid,ts2,provider):
                     pcm2wav(rid)
                     save2ssdb(rid)
-                    bfwav(rid,ts2,provider,hdt)
+                bfwav(rid,ts2,provider,hdt)
 
                 hdt.save_db()
 
@@ -361,7 +365,7 @@ def audio_dump(rid, ts, provider='aws'):
 
 def pcm2wav(rid):
     fn = rid
-    p = Popen(["./SpeexToPcm",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
+    p = Popen(["./spx_decoder",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
     output, err = p.communicate("")
     #print(output)
     #print(err)

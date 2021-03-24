@@ -32,6 +32,8 @@ def fix_app_id():
         if o1 != None:
           ver = o1.get('vos_sdk_release')
           if ver == None:
+            ver = o1.get('vos_sdk_release ')  
+          if ver == None:
             ver = o1.get('vossdk','N/A')  
       except:
         print(f"fail to parse {o}")

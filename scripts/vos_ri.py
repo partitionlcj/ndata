@@ -37,7 +37,9 @@ def parse(o, vri):
   if ver != None:
     vri.vossdk_ver = ver.get('vos_sdk_release')
     if vri.vossdk_ver == None:
-        vri.vossdk_ver = ver.get('vossdk','N/A')
+      vri.vossdk_ver = ver.get('vos_sdk_release ')
+    if vri.vossdk_ver == None:
+      vri.vossdk_ver = ver.get('vossdk','N/A')
   asrNluRequestHeader = o.get('asrNluRequestHeader')
   if asrNluRequestHeader != None:
     vri.request_id = asrNluRequestHeader.get("id","")
@@ -153,6 +155,7 @@ def vos_ri(hour):
             print("query too long: " + rid + " - " + str(vri.query))
             continue
         c.execute("REPLACE INTO `vos_debug_query` (`request_id`, `session_id`, `vehicle_id`, `env`, `oneshot`, `car_type`, `query`, `tts`, `view_text`, `use_cloud_response`, `operations`, `start_time`, `end_time`, duration, `update_time`,domain,intents,wakeup,wakeup_asr_text,app_id,city,province,vossdk_ver) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s,%s, %s, %s,%s,%s,%s, %s)",vri.to_sql_params() )
+
   db.commit()
   print("vos di complete")
 

@@ -28,10 +28,9 @@ class HuDataTracking(object):
         self.nlu_type = -1
         self.multi_round = 0
         self.city = ''
-        self.address = ''
+        self.province= ''
         self.request_trigger_by = 0
         self.use_response = 0
-        self.awaken_type = 0
         self.sound_location = ''
         self.state = -1
         self.operations = ''
@@ -45,6 +44,8 @@ class HuDataTracking(object):
         self.use_inhouse = ''
         self.voice_id = 0
         self.output = ''
+        self.continuous_dialog = False
+        self.bfwav = 0
 
     def get_req_infos(self, r):
         if r != None:
@@ -135,6 +136,7 @@ class HuDataTracking(object):
         self.oneshot = input.get('oneshot', None)
         self.app_id = input.get('app_id', None)
        
+
         q = input.get("query",None)
         if q != None and self.query != 'N/A' and  q != self.query:
             print("[Fix] find query correction: " + q)
@@ -144,14 +146,15 @@ class HuDataTracking(object):
         self.voice_id = int(extra.get('voiceId',0))
         self.sd_ver = extra.get('sdVer',None)
         self.sound_location = extra.get('soundLocation',None)
+        self.continuous_dialog = extra.get("continuousDialog",False)
 
         if r != None and 'intentList' in r and len(r['intentList']) > 0:
             intents = ''
             for i in r['intentList']:
                 if len(intents) == 0:
-                    intents = i['type']
+                    intents = i.get('type','')
                 else:
-                    intents = intents + ',' + i['type']
+                    intents = intents + ',' + i.get('type','')
             self.intents = intents
         else:
             self.intents = ''
@@ -183,29 +186,32 @@ class HuDataTracking(object):
 
         l = ss.get('location', None)
         self.city = ss.get('curCity', '')
+        self.province = ss.get('province', '')
 
         if l:
             if 'curCity' in l :
                 self.city = l.get('curCity', '')
+                self.province = l.get('province', '')
             else:
                 ll = l.split(",")
                 ct = city.get_city(float(ll[0]),float(ll[1]))
-                if self.city != '' and self.city != ct:
+                if self.city != '' and self.city != ct.get('name'):
                     print(f"{self.city} != {ct}, l={l}")
-                self.city = ct
+                self.city = ct.get('name')
+                self.province = ct.get('province')
 
-        self.save_db()
 
     def save_db(self):
         with db.cursor() as c:
             c.execute(
-                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,address,request_trigger_by,use_response,awaken_type,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)",
+                "REPLACE INTO debug_query (request_id, vehicle_id, session_id, user_id, query,nlu_type, final_tts, final_view_text, ts, domain, intents,multi_round,env,city,province,request_trigger_by,use_response,sound_location,state,operations,catemr,cst_id,client_version,sd_ver, inhouse_query, oneshot, voice_id, output, app_id,continuous_dialog,bfwav) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s)",
                 (self.request_id, self.vehicle_id, self.session_id, self.user_id, self.query, self.nlu_type,
                  self.final_tts, self.final_view_text, self.ts, self.domain, self.intents, self.multi_round, self.env,
-                 self.city, self.address, self.request_trigger_by, self.use_response, self.awaken_type,
+                 self.city, self.province, self.request_trigger_by, self.use_response, 
                  self.sound_location, self.state, self.operations, self.catemr, self.cst_id, self.client_version,
-                 self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id))
+                 self.sd_ver, self.query_inhouse, self.oneshot, self.voice_id, self.output, self.app_id, self.continuous_dialog,self.bfwav))
+            print(self.request_id)
             db.commit()
 
 def process_vid_file(fn):
@@ -230,22 +236,14 @@ def get_exist_rids(c,ts):
 3. 获取实车vid和激活ts
 4. 获取request_info起始时间开始的数据，对每条数据检查vid和ts，分析是否是有效数据；
 '''
-def pipeline():
+def pipeline(rid):
     total_query = 0
     insert_query = 0
 
-    back_time = 7*24*60*60*1000
-
-    ts_end = int(time.time()*1000) 
-    ts = ts_end - back_time
-    vid_ts = {}
-
     with db_ri.cursor() as c1, db.cursor() as c2:
-        rids = get_exist_rids(c2,ts)
-        print(f"{len(rids)} already inserted.")
-        print("select * from request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
-        c1.execute("select * from request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
+        c1.execute("select * from request_info where id=%s",(rid))
         rs1 = c1.fetchall()
+        rids = []
 
         for r1 in rs1:
             rid = r1.get('id')
@@ -257,7 +255,6 @@ def pipeline():
             if rid not in rids: #and  and :
                 hdt = HuDataTracking()
 
-                print(rid)
                 hdt.get_req_infos(r1)
                 insert_query += 1
 
@@ -268,11 +265,29 @@ def pipeline():
                 if audio_dump(rid,ts2,provider):
                     pcm2wav(rid)
                     save2ssdb(rid)
+                bfwav(rid,ts2,provider,hdt)
 
+                hdt.save_db()
         print(f"total {total_query} queries, insert {insert_query} queries")
 
-def asr_pipeline():
-    back_time = 365*24*60*60*1000
+def bfwav(rid,ts2,provider,hdt):
+  check_bfwav(rid,ts2,provider,1,0,hdt)
+  #check_bfwav(rid,ts2,provider,1,1,hdt)
+  check_bfwav(rid,ts2,provider,4,0,hdt)
+  #check_bfwav(rid,ts2,provider,4,1,hdt)
+
+def check_bfwav(rid,ts2,provider,channel,useSpeex,hdt):
+  nRid = f"{rid}_{channel}_{useSpeex}"
+  if audio_dump(nRid,ts2,provider):
+    if channel == 1:
+      pcm2wav(nRid)
+    else:
+      pcm2wav_4channel(nRid)
+    save2ssdb2(f"{rid}_{channel}", nRid)
+    hdt.bfwav = hdt.bfwav + channel
+
+def asr_pipeline(hour):
+    back_time = hour*60*60*1000
 
     ts_end = int(time.time()*1000) 
     ts = ts_end - back_time
@@ -280,7 +295,7 @@ def asr_pipeline():
     wav_num = 0
 
     with db_ri.cursor() as c1:
-        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s and app_id=%s",(ts,ts_end,'100990130'))        
+        c1.execute("select * from asr_request_info where `timestamp`>=%s and `timestamp`<%s",(ts,ts_end))
         rs1 = c1.fetchall()
 
         for r1 in rs1:
@@ -288,6 +303,7 @@ def asr_pipeline():
             app_id = r1.get('app_id')
             env = r1.get('env')
             ts2 = r1.get('timestamp')
+            env = r1.get('env')
 
             if env.find('dev') >=0 or env.find("int") > 0:
                 if app_id != '100990130':
@@ -304,21 +320,16 @@ def asr_pipeline():
 
         print(f"{wav_num} asr wav imported.")
 
-
-
-
 def audio_dump(rid, ts, provider='aws'):
-    dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
-    KEY = 'audio_data/'+ dt +'/' + rid
-
     if conn['ssdb'].get(rid) != None:
         print('skip')
         return
+
+    dt = datetime.datetime.fromtimestamp(ts/1000).strftime('%Y-%m-%d')
     bucket = BUCKET_NAME
 
     if provider == 'hw':
         bucket = 'ais-storage-gz'
-        print('hw')
         s3 = boto3.resource(
                     's3',
                     aws_access_key_id='EPYG0BBE0O37MORZ8WGE',
@@ -328,9 +339,9 @@ def audio_dump(rid, ts, provider='aws'):
     else:
         s3 = boto3.resource('s3')
     
+    KEY = 'audio_data/'+ dt +'/' + rid
 
     try:
-        print(KEY)
         s3.Bucket(bucket).download_file(KEY, rid)
         return True
     except botocore.exceptions.ClientError as e:
@@ -344,29 +355,38 @@ def pcm2wav(rid):
     fn = rid
     p = Popen(["./spx_decoder",fn, fn+".wav"],stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=r'/home/zhouji/app/ndata_di')
     output, err = p.communicate("")
-    print(output)
-    print(err)
+    #print(output)
+    #print(err)
 
-def pcm2wav1(rid):
+def pcm2wav_4channel(rid):
     with open(rid, 'rb') as pcmfile:
         pcmdata = pcmfile.read()
     with wave.open( rid + '.wav', 'wb') as wavfile:
-        wavfile.setparams((1, 2, 16000, 0, 'NONE', 'NONE'))
+        wavfile.setparams((4, 2, 16000, 0, 'NONE', 'NONE'))
         wavfile.writeframes(pcmdata)
 
 def save2ssdb(rid):
     with open( rid + '.wav', 'rb') as wavfile:
         data = wavfile.read()
-        print(rid+".wav")
         ssdb_save(rid,data)
+        print("add wav "+rid)
     os.remove(rid)
     os.remove(rid+".wav")
-    
+
+def save2ssdb2(key,fn):
+    with open( fn + '.wav', 'rb') as wavfile:
+        data = wavfile.read()
+        ssdb_save(key,data)
+        print("add wav "+key)
+    os.remove(fn)
+    os.remove(fn+".wav")
+    print(f"save {fn} to key")
 
 if __name__ == '__main__':
     init()
     db = conn['db']
     db_ri = conn['db_ri']
-    asr_pipeline()
+    rid = sys.argv[1]
+    pipeline(rid)
     
     

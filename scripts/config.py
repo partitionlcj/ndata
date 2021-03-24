@@ -19,13 +19,13 @@ type2_intents = set(
 type3 = '10058 10018 10019 10021'.split(" ")
 
 def init():
-    #conn['ssdb'] = pyssdb.Client(host='10.86.11.20',port=31120)
+    #conn['ssdb'] = pyssdb.Client(host='10.86.11.38',port=13231)
     conn['ssdb'] = pyssdb.Client(host='10.25.9.37',port=13231)
     conn['db'] = pymysql.connect(
         host='10.25.9.37',
         port=3306,
-        user='ndata',
-        password='dsfEncr43slf',
+        user='ais-dev',
+        password='QAdr45mfrkled',
         db='sariel',
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor,
@@ -123,11 +123,9 @@ def ssdb_get2(key):
     return conn['ssdb2'].get(key)
 
 def ssdb_save(key,v):
-    print(key)
     conn['ssdb'].set(key,v)
 
 def ssdb_save_json(key,v):
-    print(key)
     conn['ssdb'].set(key,json.dumps(v))
 
 def date_count(c,sql,date_count):
