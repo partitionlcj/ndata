@@ -106,11 +106,26 @@ export default {
         key: 'app_id',
         minWidth: 150,
       });
-      columns.push({
+      columns.push(
+        {
         title: 'query',
         key: 'query',
         minWidth: 150,
-      })
+         render: (h, params) => {
+            let text = params.row.query
+            if( params.row.query.startsWith("{") ){
+              let o = JSON.parse(params.row.query)
+              
+              if( o.asrResultBeforeCorrection != '' && o.asrResultBeforeCorrection != o.asrResult){
+                  text = o.asrResult+'^'+o.asrCorrectionType +"^" + o.asrResultBeforeCorrection
+              }else{
+                text = o.asrResult
+              }
+            }
+            return h('div', text)
+          }
+        }
+      )
       columns.push({
           title: 'env',
           key: 'env',
