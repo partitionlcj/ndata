@@ -1,45 +1,45 @@
 import Vue from 'vue';
-import aisTool from 'ais-components';
+import aisTool from 'mars-common';
 import api from '../../api/index';
 
 const state = {
-  name: '',
-  role: '',
+    name: '',
+    role: '',
 }
 
 const getters = {
-  hasInfo(state) {
-    return Boolean(aisTool.Cookie.getData("ops-role") == "ROLE_NDATA_USER");
-  }
+    hasInfo(state) {
+        return Boolean(aisTool.Cookie.getData("ops-role") == "ROLE_NDATA_USER");
+    }
 }
 
 const actions = {
-  async login({ commit }) {
-    let name = aisTool.Cookie.getData("ops-name")
-    let role = aisTool.Cookie.getData("ops-role")
-    commit('LOGIN', { name, role });
-    return role;
-  }
+    async login({ commit }) {
+        let name = aisTool.Cookie.getData("ops-name")
+        let role = aisTool.Cookie.getData("ops-role")
+        commit('LOGIN', { name, role });
+        return role;
+    }
 };
 
 const mutations = {
-  LOGIN(state, info) {
-    state.name = info.name;
-    state.role = info.role;
-  },
-  LOGOUT(state, info) {
-    aisTool.Cookie.delData('ops-name');
-    aisTool.Cookie.delData('ops-role');
-    aisTool.Cookie.delData('ops-org');
-    aisTool.Cookie.delData('mars_token');
-    state.name = '';
-    state.role = '';
-  }
+    LOGIN(state, info) {
+        state.name = info.name;
+        state.role = info.role;
+    },
+    LOGOUT(state, info) {
+        aisTool.Cookie.delData('ops-name');
+        aisTool.Cookie.delData('ops-role');
+        aisTool.Cookie.delData('ops-org');
+        aisTool.Cookie.delData('mars_token');
+        state.name = '';
+        state.role = '';
+    }
 };
 
 export default {
-  state,
-  getters,
-  actions,
-  mutations
+    state,
+    getters,
+    actions,
+    mutations
 }

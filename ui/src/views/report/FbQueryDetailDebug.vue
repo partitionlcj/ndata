@@ -52,7 +52,7 @@
   </div>
 </template>
 <script>
-import aisTool from "ais-components";
+import aisTool from "mars-common";
 import api from "../../api";
 import real from "../../api/real";
 import InfoModal from "../../components/Modal/InfoModal";
