@@ -26,6 +26,8 @@ Vue.use(iView, {
     size: 'large'
 });
 Vue.use(AisComponents);
+
+Vue.component('WavAudio', require('./components/Audio/WavAudio.vue').default);
 Vue.component('chart', ECharts);
 ECharts.registerMap('china', chinaMap);
 const routerApp = new Vue({

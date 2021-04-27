@@ -37,9 +37,12 @@ import api from '../../api';
 import real from '../../api/real';
 import InfoModal from '../../components/Modal/InfoModal';
 import util from '../../util';
+import WavAudio from '../../components/Audio/';
+
 export default {
   components: {
-    InfoModal
+    InfoModal,
+    WavAudio
   },
   data() {
     return {
@@ -134,7 +137,7 @@ export default {
           title: '音频',
           width: 70,
           render: (h, params) => {
-            return h('AisAudio', {
+            return h('WavAudio', {
               props: {
                 url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
                 size: 14

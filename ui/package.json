@@ -15,7 +15,7 @@
         "babel-preset-stage-2": "^6.24.1",
         "iview": "^3.2.2",
         "less-loader": "^5.0.0",
-        "mars-common": "^1.0.10",
+        "mars-common": "^1.0.17",
         "moment": "^2.23.0",
         "moment-range": "^4.0.2",
         "spdx-exceptions": "^2.3.0",

@@ -57,11 +57,14 @@ import api from "../../api";
 import real from "../../api/real";
 import InfoModal from "../../components/Modal/InfoModal";
 import BadcaseModal from "../../components/Modal/BadcaseModal";
+import WavAudio from '../../components/Audio/';
+
 import util from "../../util";
 export default {
   components: {
     InfoModal,
     BadcaseModal,
+    WavAudio
   },
   data() {
     return {
@@ -182,7 +185,7 @@ export default {
         render: (h, params) => {
           return h("div", [
             h("div", params.row.query),
-            h("AisAudio", {
+            h("WavAudio", {
               props: {
                 url: `/api/audio/download_wav?requestId=${params.row.request_id}`,
                 size: 14,
@@ -197,7 +200,7 @@ export default {
         render: (h, params) => {
           let wavs = []
           if( params.row.bfwav == 1 || params.row.bfwav == 5){
-            wavs.push(h("AisAudio", {
+            wavs.push(h("Audio", {
               props: {
                 url: `/api/audio/download_wav?requestId=${params.row.request_id}_1`,
                 size: 14,
@@ -205,7 +208,7 @@ export default {
             }))
           }
           if( params.row.bfwav == 4 || params.row.bfwav == 5){
-            wavs.push(h("AisAudio", {
+            wavs.push(h("Audio", {
               props: {
                 url: `/api/audio/download_wav?requestId=${params.row.request_id}_4`,
                 size: 14,
@@ -245,7 +248,7 @@ export default {
             if (params.row.wakeup === 1) {
               return h("div", [
                 h("div", params.row.wakeup_asr_text),
-                h("AisAudio", {
+                h("Audio", {
                   props: {
                     url: `/api/audio/wakeup_wav?requestId=${params.row.request_id}`,
                     size: 14,
